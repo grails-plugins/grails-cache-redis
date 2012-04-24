@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import grails.plugin.cache.ConfigBuilder
 import grails.plugin.cache.redis.GrailsRedisCacheManager
 import grails.plugin.cache.web.filter.redis.GrailsDeserializer
 import grails.plugin.cache.web.filter.redis.GrailsDeserializingConverter
@@ -57,15 +58,16 @@ class CacheRedisGrailsPlugin {
 			return
 		}
 
-		def cacheConfig = application.config.grails.cache.redis
-		int database = cacheConfig.database ?: 0
-		boolean usePool = (cacheConfig.usePool instanceof Boolean) ? cacheConfig.usePool : true
-		String hostName = cacheConfig.hostName ?: 'localhost'
-		int port = cacheConfig.port ?: Protocol.DEFAULT_PORT
-		int timeout = cacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
-		String password = cacheConfig.password ?: null
+		def cacheConfig = application.config.grails.cache
+		def redisCacheConfig = cacheConfig.redis
+		int database = redisCacheConfig.database ?: 0
+		boolean usePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
+		String hostName = redisCacheConfig.hostName ?: 'localhost'
+		int port = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
+		int timeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
+		String password = redisCacheConfig.password ?: null
 
-		grailsCacheJedisConnectionFactory(JedisPoolConfig)
+		grailsCacheJedisPoolConfig(JedisPoolConfig)
 
 		grailsCacheJedisShardInfo(JedisShardInfo, hostName, port) {
 			password = password
@@ -79,11 +81,12 @@ class CacheRedisGrailsPlugin {
 			port = port
 			timeout = timeout
 			password = password
-			poolConfig = ref('grailsCacheJedisConnectionFactory')
+			poolConfig = ref('grailsCacheJedisPoolConfig')
 			shardInfo = ref('grailsCacheJedisShardInfo')
 		}
 
 		grailsRedisCacheSerializer(GrailsSerializer)
+
 		grailsRedisCacheDeserializer(GrailsDeserializer)
 
 		grailsRedisCacheDeserializingConverter(GrailsDeserializingConverter) {
@@ -104,7 +107,7 @@ class CacheRedisGrailsPlugin {
 			defaultSerializer = ref('grailsCacheRedisSerializer')
 		}
 
-		String delimiter = cacheConfig.cachePrefixDelimiter ?: ':'
+		String delimiter = redisCacheConfig.cachePrefixDelimiter ?: ':'
 		redisCachePrefix(DefaultRedisCachePrefix, delimiter)
 
 		grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
@@ -119,6 +122,28 @@ class CacheRedisGrailsPlugin {
 			keyGenerator = ref('webCacheKeyGenerator')
 			expressionEvaluator = ref('webExpressionEvaluator')
 		}
+	}
+
+	def doWithApplicationContext = { ctx ->
+
+		def cacheConfig = application.config.grails.cache
+
+		// TODO hard-coding from the core plugin for now
+		def configuredCacheNames = ['grailsBlocksCache', 'grailsTemplatesCache']
+		if (cacheConfig.config instanceof Closure) {
+			// reusing the builder from the core plugin since there's no configurability yet
+			ConfigBuilder builder = new ConfigBuilder()
+			builder.parse cacheConfig.config
+			configuredCacheNames.addAll builder.cacheNames
+		}
+
+		// just calling getCache() here to make sure all of the caches exist at startup
+		def cacheManager = ctx.grailsCacheManager
+		for (String name in configuredCacheNames) {
+			cacheManager.getCache name
+		}
+
+		log.debug "Configured caches: $cacheManager.cacheNames"
 	}
 
 	private boolean isEnabled(GrailsApplication application) {
