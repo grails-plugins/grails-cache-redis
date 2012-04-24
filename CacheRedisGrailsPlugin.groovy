@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import grails.plugin.cache.redis.GrailsRedisCacheManager
 import grails.plugin.cache.web.filter.redis.GrailsDeserializer
 import grails.plugin.cache.web.filter.redis.GrailsDeserializingConverter
 import grails.plugin.cache.web.filter.redis.GrailsRedisSerializer
@@ -23,7 +24,6 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.cache.DefaultRedisCachePrefix
-import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 
@@ -65,59 +65,55 @@ class CacheRedisGrailsPlugin {
 		int timeout = cacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
 		String password = cacheConfig.password ?: null
 
-		jedisPoolConfig(JedisPoolConfig)
+		grailsCacheJedisConnectionFactory(JedisPoolConfig)
 
-		jedisShardInfo(JedisShardInfo, hostName, port) {
+		grailsCacheJedisShardInfo(JedisShardInfo, hostName, port) {
 			password = password
 			timeout = timeout
 		}
 
-		jedisConnectionFactory(JedisConnectionFactory) {
+		grailsCacheJedisConnectionFactory(JedisConnectionFactory) {
 			usePool = usePool
 			database = database
 			hostName = hostName
 			port = port
 			timeout = timeout
 			password = password
-			poolConfig = ref('jedisPoolConfig')
-			shardInfo = ref('jedisShardInfo')
+			poolConfig = ref('grailsCacheJedisConnectionFactory')
+			shardInfo = ref('grailsCacheJedisShardInfo')
 		}
 
-		// TODO bean name
-		grailsSerializer(GrailsSerializer)
-		// TODO bean name
-		grailsDeserializer(GrailsDeserializer)
+		grailsRedisCacheSerializer(GrailsSerializer)
+		grailsRedisCacheDeserializer(GrailsDeserializer)
 
-		deserializingConverter(GrailsDeserializingConverter) {
-			// TODO bean name
-			deserializer = ref('grailsDeserializer')
+		grailsRedisCacheDeserializingConverter(GrailsDeserializingConverter) {
+			deserializer = ref('grailsRedisCacheDeserializer')
 		}
 
-		serializingConverter(GrailsSerializingConverter) {
-			// TODO bean name
-			serializer = ref('grailsSerializer')
+		grailsRedisCacheSerializingConverter(GrailsSerializingConverter) {
+			serializer = ref('grailsRedisCacheSerializer')
 		}
 
-		redisSerializer(GrailsRedisSerializer) {
-			serializer = ref('serializingConverter')
-			deserializer = ref('deserializingConverter')
+		grailsCacheRedisSerializer(GrailsRedisSerializer) {
+			serializer = ref('grailsRedisCacheSerializingConverter')
+			deserializer = ref('grailsRedisCacheDeserializingConverter')
 		}
 
-		redisTemplate(RedisTemplate) {
-			connectionFactory = ref('jedisConnectionFactory')
-			defaultSerializer = ref('redisSerializer')
+		grailsCacheRedisTemplate(RedisTemplate) {
+			connectionFactory = ref('grailsCacheJedisConnectionFactory')
+			defaultSerializer = ref('grailsCacheRedisSerializer')
 		}
 
 		String delimiter = cacheConfig.cachePrefixDelimiter ?: ':'
 		redisCachePrefix(DefaultRedisCachePrefix, delimiter)
 
-		cacheManager(RedisCacheManager, ref('redisTemplate')) {
+		grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
 			cachePrefix = ref('redisCachePrefix')
 		}
 
 		grailsCacheFilter(RedisPageFragmentCachingFilter) {
-			cacheManager = ref('cacheManager')
-			nativeCacheManager = ref('redisTemplate')
+			cacheManager = ref('grailsCacheManager')
+			nativeCacheManager = ref('grailsCacheRedisTemplate')
 			// TODO this name might be brittle - perhaps do by type?
 			cacheOperationSource = ref('org.springframework.cache.annotation.AnnotationCacheOperationSource#0')
 			keyGenerator = ref('webCacheKeyGenerator')
