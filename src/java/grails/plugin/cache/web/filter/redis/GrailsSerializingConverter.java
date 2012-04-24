@@ -25,7 +25,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
  */
 public class GrailsSerializingConverter implements Converter<Object, byte[]> {
 
-	private Serializer<Object> serializer;
+	protected Serializer<Object> serializer;
 
 	/**
 	 * Serializes the source object and returns the byte array result.

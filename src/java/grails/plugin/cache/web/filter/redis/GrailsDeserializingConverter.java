@@ -25,7 +25,7 @@ import org.springframework.core.serializer.support.SerializationFailedException;
  */
 public class GrailsDeserializingConverter implements Converter<byte[], Object> {
 
-	private Deserializer<Object> deserializer;
+	protected Deserializer<Object> deserializer;
 
 	public Object convert(byte[] source) {
 		try {

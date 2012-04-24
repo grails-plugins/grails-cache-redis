@@ -25,8 +25,8 @@ public class GrailsRedisSerializer implements RedisSerializer<Object> {
 
 	public static final byte[] EMPTY_ARRAY = new byte[0];
 
-	private Converter<Object, byte[]> serializer;
-	private Converter<byte[], Object> deserializer;
+	protected Converter<Object, byte[]> serializer;
+	protected Converter<byte[], Object> deserializer;
 
 	public Object deserialize(byte[] bytes) {
 		if (bytes == null || bytes.length == 0) {
