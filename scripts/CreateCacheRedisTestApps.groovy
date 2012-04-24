@@ -51,9 +51,28 @@ private void installPlugins() {
 
 	buildConfig.withWriter { it.writeLine contents }
 
+	File configGroovy = new File(testprojectRoot, 'grails-app/conf/Config.groovy')
+	contents = configGroovy.text
+	contents += '''
+
+grails.cache.config = {
+	cache {
+		name 'basic'
+		eternal false
+		overflowToDisk true
+		maxElementsInMemory 10000
+		maxElementsOnDisk 10000000
+	}
+}
+
+'''
+
+	configGroovy.withWriter { it.writeLine contents }
+
 	callGrails(grailsHome, testprojectRoot, 'dev', 'install-plugin') {
 		ant.arg value: "functional-test $functionalTestPluginVersion"
 	}
+
 	callGrails(grailsHome, testprojectRoot, 'dev', 'install-plugin') {
 		ant.arg value: pluginZip.absolutePath
 	}
