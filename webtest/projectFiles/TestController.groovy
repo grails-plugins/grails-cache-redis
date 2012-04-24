@@ -5,7 +5,7 @@ import org.springframework.cache.annotation.Cacheable
 
 class TestController {
 
-	def cacheManager
+	def grailsCacheManager
 
 	@Cacheable('message')
 	def index() {
@@ -39,7 +39,7 @@ class TestController {
 	}
 
 	def clearCache() {
-		cacheManager.getCache('message').evict()
+		grailsCacheManager.getCache('message').evict()
 		render 'cleared cache'
 	}
 }
