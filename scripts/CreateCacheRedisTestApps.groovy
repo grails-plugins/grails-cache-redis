@@ -57,7 +57,7 @@ private void installPlugins() {
 
 grails.cache.config = {
 	cache {
-		name 'basic'
+		name 'message'
 		eternal false
 		overflowToDisk true
 		maxElementsInMemory 10000
