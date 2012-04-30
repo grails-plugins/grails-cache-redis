@@ -4,3 +4,13 @@ log4j = {
 	      'org.hibernate',
 	      'net.sf.ehcache.hibernate'
 }
+
+// for tests
+grails.cache.config = {
+	cache {
+		name 'fromConfigGroovy1'
+	}
+	cache {
+		name 'fromConfigGroovy2'
+	}
+}

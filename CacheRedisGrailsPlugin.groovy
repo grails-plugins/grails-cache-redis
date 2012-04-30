@@ -39,7 +39,10 @@ class CacheRedisGrailsPlugin {
 	String version = '0.1-SNAPSHOT'
 	String grailsVersion = '2.0 > *'
 	def loadAfter = ['cache']
-	def pluginExcludes = ['scripts/CreateCacheRedisTestApps.groovy']
+	def pluginExcludes = [
+		'grails-app/conf/TestCacheConfig.groovy',
+		'scripts/CreateCacheRedisTestApps.groovy'
+	]
 
 	String title = 'Redis Cache Plugin'
 	String author = 'Burt Beckwith'
