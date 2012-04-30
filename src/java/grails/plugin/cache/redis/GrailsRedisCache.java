@@ -72,7 +72,7 @@ public class GrailsRedisCache implements Cache {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * This implementation simply returns the RedisTemplate used for configuring
 	 * the cache, giving access to the underlying Redis store.
 	 */

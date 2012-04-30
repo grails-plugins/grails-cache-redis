@@ -21,6 +21,9 @@ import java.io.Serializable;
 
 import org.springframework.core.serializer.Serializer;
 
+/**
+ * @author Burt Beckwith
+ */
 public class GrailsSerializer implements Serializer<Object> {
 
 	public void serialize(Object object, OutputStream outputStream) throws IOException {

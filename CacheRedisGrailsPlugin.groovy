@@ -127,28 +127,6 @@ class CacheRedisGrailsPlugin {
 		}
 	}
 
-	def doWithApplicationContext = { ctx ->
-
-		def cacheConfig = application.config.grails.cache
-
-		// TODO hard-coding from the core plugin for now
-		def configuredCacheNames = ['grailsBlocksCache', 'grailsTemplatesCache']
-		if (cacheConfig.config instanceof Closure) {
-			// reusing the builder from the core plugin since there's no configurability yet
-			ConfigBuilder builder = new ConfigBuilder()
-			builder.parse cacheConfig.config
-			configuredCacheNames.addAll builder.cacheNames
-		}
-
-		// just calling getCache() here to make sure all of the caches exist at startup
-		def cacheManager = ctx.grailsCacheManager
-		for (String name in configuredCacheNames) {
-			cacheManager.getCache name
-		}
-
-		log.debug "Configured caches: $cacheManager.cacheNames"
-	}
-
 	private boolean isEnabled(GrailsApplication application) {
 		// TODO
 		true
