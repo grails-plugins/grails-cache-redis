@@ -14,13 +14,14 @@
  */
 package grails.plugin.cache.redis;
 
+import grails.plugin.cache.GrailsCacheManager;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.cache.DefaultRedisCachePrefix;
 import org.springframework.data.redis.cache.RedisCachePrefix;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,7 +32,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @author Costin Leau
  * @author Burt Beckwith
  */
-public class GrailsRedisCacheManager implements CacheManager {
+public class GrailsRedisCacheManager implements GrailsCacheManager {
 
 	// fast lookup by name map
 	protected final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
@@ -58,6 +59,20 @@ public class GrailsRedisCacheManager implements CacheManager {
 
 	public Collection<String> getCacheNames() {
 		return names;
+	}
+
+	public boolean cacheExists(String name) {
+		return getCacheNames().contains(name);
+	}
+
+	public boolean destroyCache(String name) {
+		Cache cache = caches.remove(name);
+		if (cache != null) {
+			// TODO remove Redis backing store
+			cache.clear();
+		}
+
+		return true;
 	}
 
 	/**
