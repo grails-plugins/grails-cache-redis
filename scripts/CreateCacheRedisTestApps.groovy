@@ -80,11 +80,8 @@ grails.cache.config = {
 	}
 
 	callGrails(grailsHome, testprojectRoot, 'dev', 'install-plugin') {
-		ant.arg value: "cache-redis $pluginVersion"
+		ant.arg value: pluginZip.absolutePath
 	}
-//	callGrails(grailsHome, testprojectRoot, 'dev', 'install-plugin') {
-//		ant.arg value: pluginZip.absolutePath
-//	}
 
 	// trigger plugin initialization
 	callGrails(grailsHome, testprojectRoot, 'dev', 'compile')
