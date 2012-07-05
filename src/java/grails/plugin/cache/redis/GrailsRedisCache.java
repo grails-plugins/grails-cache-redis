@@ -14,16 +14,19 @@
  */
 package grails.plugin.cache.redis;
 
+import grails.plugin.cache.GrailsCache;
 import grails.plugin.cache.GrailsValueWrapper;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.cache.Cache;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
 
@@ -33,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Costin Leau
  * @author Burt Beckwith
  */
-public class GrailsRedisCache implements Cache {
+public class GrailsRedisCache implements GrailsCache {
 
 	protected static final int PAGE_SIZE = 128;
 
@@ -159,6 +162,34 @@ public class GrailsRedisCache implements Cache {
 				}
 			}
 		}, true);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Collection<Object> getAllKeys() {
+		Set<byte[]> serializedKeys = (Set<byte[]>) template.execute(new RedisCallback<Set<byte[]>>() {
+			public Set<byte[]> doInRedis(RedisConnection connection) throws DataAccessException {
+				Set<byte[]> allKeys = new HashSet<byte[]>();
+				int offset = 0;
+				boolean finished = false;
+				while (!finished) {
+					// need to paginate the keys
+					Set<byte[]> keys = connection.zRange(setName, (offset) * PAGE_SIZE, (offset + 1) * PAGE_SIZE - 1);
+					allKeys.addAll(keys);
+					finished = keys.size() < PAGE_SIZE;
+					offset++;
+				}
+				return allKeys;
+			}
+		}, true);
+
+		@SuppressWarnings("rawtypes")
+		Collection<Object> keys = new HashSet(serializedKeys.size());
+		RedisSerializer<byte[]> keySerializer = template.getKeySerializer();
+		for (byte[] bytes : serializedKeys) {
+			keys.add(keySerializer.deserialize(bytes));
+		}
+
+		return keys;
 	}
 
 	protected byte[] computeKey(Object key) {
