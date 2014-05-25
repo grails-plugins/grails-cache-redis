@@ -94,6 +94,16 @@ public class GrailsRedisCache implements GrailsCache {
 		}, true);
 	}
 
+    public <T> T get(final Object key, Class<T> type) {
+		return (T) template.execute(new RedisCallback<T>() {
+			public T doInRedis(RedisConnection connection) throws DataAccessException {
+				waitForLock(connection);
+				byte[] bs = connection.get(computeKey(key));
+				return (T)template.getValueSerializer().deserialize(bs);
+			}
+		}, true);
+    }
+
 	protected GrailsValueWrapper newValueWrapper(Object value) {
 		return value == null ? null : new GrailsValueWrapper(value, null);
 	}
