@@ -1,0 +1,3 @@
+DefaultPackage
+grails.plugin.cache.redis
+grails.plugin.cache.web.filter.redis
