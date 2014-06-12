@@ -12,12 +12,12 @@ grails.project.dependency.resolution = {
 	repositories {
 		grailsCentral()
 		mavenLocal()
-    mavenCentral()
+    	mavenCentral()
 	}
 
 	dependencies {
-		compile 'redis.clients:jedis:2.4.2'
-    compile 'org.springframework:spring-expression:4.0.2.RELEASE'
+		compile 'redis.clients:jedis:2.5.1'
+    	compile 'org.springframework:spring-expression:4.0.5.RELEASE'
 		compile 'org.springframework.data:spring-data-redis:1.3.0.RELEASE'
 	}
 
@@ -25,6 +25,6 @@ grails.project.dependency.resolution = {
 		build(':release:3.0.1', ':rest-client-builder:2.0.1') {
 			export = false
 		}
-		compile ':cache:1.1.3'
+		compile ':cache:1.1.6'
 	}
 }

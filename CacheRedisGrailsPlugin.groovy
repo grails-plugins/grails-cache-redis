@@ -50,10 +50,10 @@ class CacheRedisGrailsPlugin {
 	String author = 'Burt Beckwith'
 	String authorEmail = 'beckwithb@vmware.com'
 	String description = 'A Redis-based implementation of the Cache plugin'
-	String documentation = 'http://grails.org/plugin/cache-redis'
+	String documentation = 'http://grails-plugins.github.io/grails-cache-redis/'
 
 	String license = 'APACHE'
-	def organization = [name: 'SpringSource', url: 'http://www.springsource.org/']
+	def organization = [name: 'Pivotal', url: 'http://www.gopivotal.com/oss']
 	def issueManagement = [system: 'JIRA', url: 'http://jira.grails.org/browse/GPCACHEREDIS']
 	def scm = [url: 'https://github.com/grails-plugins/grails-cache-redis']
 
