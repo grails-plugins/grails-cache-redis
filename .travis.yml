@@ -1,4 +1,6 @@
 language: groovy
+services:
+  - redis
 jdk:
 - oraclejdk7
 before_script:
