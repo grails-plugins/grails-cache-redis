@@ -71,6 +71,10 @@ class CacheRedisGrailsPlugin {
 		int timeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
 		String password = redisCacheConfig.password ?: null
 		Boolean isUsePrefix = (redisCacheConfig.usePrefix instanceof Boolean) ? redisCacheConfig.usePrefix : false
+		String keySerializerBean = redisCacheConfig.keySerializer instanceof String ?
+			redisCacheConfig.keySerializer : null
+		String hashKeySerializerBean = redisCacheConfig.hashKeySerializer instanceof String ?
+			redisCacheConfig.hashKeySerializer : null
 
 		grailsCacheJedisPoolConfig(JedisPoolConfig)
 
@@ -110,6 +114,10 @@ class CacheRedisGrailsPlugin {
 		grailsCacheRedisTemplate(RedisTemplate) {
 			connectionFactory = ref('grailsCacheJedisConnectionFactory')
 			defaultSerializer = ref('grailsCacheRedisSerializer')
+			if (keySerializerBean)
+				keySerializer = ref(keySerializerBean)
+			if (hashKeySerializerBean)
+				hashKeySerializer = ref(hashKeySerializerBean)
 		}
 
 		String delimiter = redisCacheConfig.cachePrefixDelimiter ?: ':'
