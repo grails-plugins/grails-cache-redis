@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import grails.plugin.cache.ConfigBuilder
 import grails.plugin.cache.redis.GrailsRedisCacheManager
 import grails.plugin.cache.web.filter.redis.GrailsDeserializer
 import grails.plugin.cache.web.filter.redis.GrailsDeserializingConverter
@@ -71,6 +70,7 @@ class CacheRedisGrailsPlugin {
 		int port = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
 		int timeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
 		String password = redisCacheConfig.password ?: null
+		Boolean isUsePrefix = (redisCacheConfig.usePrefix instanceof Boolean) ? redisCacheConfig.usePrefix : false
 
 		grailsCacheJedisPoolConfig(JedisPoolConfig)
 
@@ -117,6 +117,7 @@ class CacheRedisGrailsPlugin {
 
 		grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
 			cachePrefix = ref('redisCachePrefix')
+			usePrefix = isUsePrefix
 		}
 
 		grailsCacheFilter(RedisPageFragmentCachingFilter) {

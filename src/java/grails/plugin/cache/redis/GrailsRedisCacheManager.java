@@ -83,4 +83,12 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
 	public void setCachePrefix(RedisCachePrefix prefix) {
 		cachePrefix = prefix;
 	}
+
+	/**
+	 * Enable the cache prefix.
+	 */
+	public void setUsePrefix(Boolean use) {
+		usePrefix = use;
+	}
+
 }
