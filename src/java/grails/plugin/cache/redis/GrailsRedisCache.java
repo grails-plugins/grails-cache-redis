@@ -202,7 +202,7 @@ public class GrailsRedisCache implements GrailsCache {
 		return keys;
 	}
 
-	protected byte[] computeKey(Object key) {
+	public byte[] computeKey(Object key) {
 		@SuppressWarnings("unchecked")
 		byte[] k = template.getKeySerializer().serialize(key);
 
