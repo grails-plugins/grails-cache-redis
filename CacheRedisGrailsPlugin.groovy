@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import grails.plugin.cache.ConfigBuilder
+import grails.plugin.cache.redis.GrailsRedisCache
 import grails.plugin.cache.redis.GrailsRedisCacheManager
 import grails.plugin.cache.web.filter.redis.GrailsDeserializer
 import grails.plugin.cache.web.filter.redis.GrailsDeserializingConverter
@@ -36,7 +37,7 @@ class CacheRedisGrailsPlugin {
 
 	private final Logger log = LoggerFactory.getLogger('grails.plugin.cache.CacheRedisGrailsPlugin')
 
-	String version = '1.1.1-SNAPSHOT'
+	String version = '1.1.2-SNAPSHOT'
 	String grailsVersion = '2.4 > *'
 	def loadAfter = ['cache']
 	def pluginExcludes = [
@@ -67,10 +68,11 @@ class CacheRedisGrailsPlugin {
 		def redisCacheConfig = cacheConfig.redis
 		int database = redisCacheConfig.database ?: 0
 		boolean usePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
-		String hostName = redisCacheConfig.hostName ?: 'localhost'
+        String hostName = redisCacheConfig.hostName ?: 'localhost'
 		int port = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
 		int timeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
 		String password = redisCacheConfig.password ?: null
+        Long ttlInSeconds = cacheConfig.ttl ?: GrailsRedisCache.NEVER_EXPIRE
 
 		grailsCacheJedisPoolConfig(JedisPoolConfig)
 
@@ -117,6 +119,7 @@ class CacheRedisGrailsPlugin {
 
 		grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
 			cachePrefix = ref('redisCachePrefix')
+            timeToLive = ttlInSeconds
 		}
 
 		grailsCacheFilter(RedisPageFragmentCachingFilter) {

@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  */
 public class GrailsRedisCache implements GrailsCache {
 
+    public static final long NEVER_EXPIRE = 0;
 	protected static final int PAGE_SIZE = 128;
 
 	protected final String name;
@@ -47,20 +48,23 @@ public class GrailsRedisCache implements GrailsCache {
 	protected final byte[] setName;
 	protected final byte[] cacheLockName;
 	protected long WAIT_FOR_LOCK = 300;
+    protected long ttl;
 
 	/**
 	 * Constructor.
 	 * @param name cache name
 	 * @param prefix
-	 * @param cachePrefix
+	 * @param template
+     * @param ttl Time to live in seconds.
 	 */
-	public GrailsRedisCache(String name, byte[] prefix, RedisTemplate<? extends Object, ? extends Object> template) {
+	public GrailsRedisCache(String name, byte[] prefix, RedisTemplate<? extends Object, ? extends Object> template, Long ttl) {
 
 		Assert.hasText(name, "non-empty cache name is required");
 
 		this.name = name;
 		this.template = template;
 		this.prefix = prefix;
+        this.ttl = ttl == null ? NEVER_EXPIRE : ttl.longValue();
 
 		StringRedisSerializer stringSerializer = new StringRedisSerializer();
 
@@ -117,6 +121,13 @@ public class GrailsRedisCache implements GrailsCache {
 				connection.multi();
 				connection.set(k, template.getValueSerializer().serialize(value));
 				connection.zAdd(setName, 0, k);
+
+                // Set key time to live when expiration has been configured.
+                if (ttl > NEVER_EXPIRE) {
+                    connection.expire(k, ttl);
+                    connection.expire(setName, ttl);
+                }
+
 				connection.exec();
 				return null;
 			}
