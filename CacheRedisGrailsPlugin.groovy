@@ -18,6 +18,7 @@ import grails.plugin.cache.web.filter.redis.GrailsDeserializingConverter
 import grails.plugin.cache.web.filter.redis.GrailsRedisSerializer
 import grails.plugin.cache.web.filter.redis.GrailsSerializer
 import grails.plugin.cache.web.filter.redis.GrailsSerializingConverter
+import grails.plugin.cache.web.filter.redis.GrailsRedisKeySerializer
 import grails.plugin.cache.web.filter.redis.RedisPageFragmentCachingFilter
 
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -110,6 +111,8 @@ class CacheRedisGrailsPlugin {
 			serializer = ref('grailsRedisCacheSerializingConverter')
 			deserializer = ref('grailsRedisCacheDeserializingConverter')
 		}
+
+		grailsCacheRedisKeySerializer(GrailsRedisKeySerializer, ref('grailsCacheRedisSerializer'))
 
 		grailsCacheRedisTemplate(RedisTemplate) {
 			connectionFactory = ref('grailsCacheJedisConnectionFactory')
