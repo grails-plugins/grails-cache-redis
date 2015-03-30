@@ -26,7 +26,7 @@ import redis.clients.jedis.JedisShardInfo
 import redis.clients.jedis.Protocol
 
 /**
- * @author Burt Beckwith
+ * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
  */
 class CacheRedisGrailsPlugin {
 
@@ -43,12 +43,14 @@ class CacheRedisGrailsPlugin {
     ]
 
     String title = 'Redis Cache Plugin'
-    String author = 'Burt Beckwith'
-    String authorEmail = 'beckwithb@vmware.com'
     String description = 'A Redis-based implementation of the Cache plugin'
-    String documentation = 'http://grails-plugins.github.io/grails-cache-redis/'
 
+    String documentation = 'http://grails-plugins.github.io/grails-cache-redis/'
     String license = 'APACHE'
+    def developers = [
+            [name: "Burt Beckwith", email: 'burt@burtbeckwith.com'],
+            [name: 'Costin Leau']
+    ]
     def organization = [name: 'Pivotal', url: 'http://www.gopivotal.com/oss']
     def issueManagement = [system: 'JIRA', url: 'http://jira.grails.org/browse/GPCACHEREDIS']
     def scm = [url: 'https://github.com/grails-plugins/grails-cache-redis']
