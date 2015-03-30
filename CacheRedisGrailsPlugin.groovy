@@ -32,7 +32,7 @@ class CacheRedisGrailsPlugin {
 
     private final Logger log = LoggerFactory.getLogger('grails.plugin.cache.CacheRedisGrailsPlugin')
 
-    String version = '1.1.1-SNAPSHOT'
+    String version = '1.1.2'
     String grailsVersion = '2.5 > *'
     def loadAfter = ['cache']
     def pluginExcludes = [
