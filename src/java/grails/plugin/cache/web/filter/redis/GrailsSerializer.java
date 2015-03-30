@@ -14,27 +14,28 @@
  */
 package grails.plugin.cache.web.filter.redis;
 
+import org.springframework.core.serializer.Serializer;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-
-import org.springframework.core.serializer.Serializer;
 
 /**
  * @author Burt Beckwith
  */
 public class GrailsSerializer implements Serializer<Object> {
 
-	public void serialize(Object object, OutputStream outputStream) throws IOException {
-		if (!(object instanceof Serializable)) {
-			throw new IllegalArgumentException(getClass().getSimpleName() +
-					" requires a Serializable payload but received an object of type [" +
-					object.getClass().getName() + "]");
-		}
+    public void serialize(Object object, OutputStream outputStream) throws IOException {
+        if (!(object instanceof Serializable)) {
+            throw new IllegalArgumentException(getClass().getSimpleName() +
+                    " requires a Serializable payload but received an object of type [" +
+                    object.getClass().getName() + "]");
+        }
 
-		ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-		oos.writeObject(object);
-		oos.flush();
-	}
+        ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+        oos.writeObject(object);
+        oos.flush();
+    }
+
 }

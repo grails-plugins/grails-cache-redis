@@ -15,16 +15,15 @@
 package grails.plugin.cache.redis;
 
 import grails.plugin.cache.GrailsCacheManager;
+import org.springframework.cache.Cache;
+import org.springframework.data.redis.cache.DefaultRedisCachePrefix;
+import org.springframework.data.redis.cache.RedisCachePrefix;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import org.springframework.cache.Cache;
-import org.springframework.data.redis.cache.DefaultRedisCachePrefix;
-import org.springframework.data.redis.cache.RedisCachePrefix;
-import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * Based on org.springframework.data.redis.cache.RedisCacheManager which has all private fields.
@@ -34,61 +33,61 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 public class GrailsRedisCacheManager implements GrailsCacheManager {
 
-	// fast lookup by name map
-	protected final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
-	protected final Collection<String> names = Collections.unmodifiableSet(caches.keySet());
-	@SuppressWarnings("rawtypes")
-	protected final RedisTemplate redisTemplate;
-	protected boolean usePrefix;
-	protected RedisCachePrefix cachePrefix = new DefaultRedisCachePrefix();
+    // fast lookup by name map
+    protected final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
+    protected final Collection<String> names = Collections.unmodifiableSet(caches.keySet());
+    @SuppressWarnings("rawtypes")
+    protected final RedisTemplate redisTemplate;
+    protected boolean usePrefix;
+    protected RedisCachePrefix cachePrefix = new DefaultRedisCachePrefix();
 
-	public GrailsRedisCacheManager(@SuppressWarnings("rawtypes") RedisTemplate template) {
-		redisTemplate = template;
-	}
+    public GrailsRedisCacheManager(@SuppressWarnings("rawtypes") RedisTemplate template) {
+        redisTemplate = template;
+    }
 
-	@SuppressWarnings("unchecked")
-	public Cache getCache(String name) {
-		Cache c = caches.get(name);
-		if (c == null) {
-			c = new GrailsRedisCache(name, (usePrefix ? cachePrefix.prefix(name) : null), redisTemplate);
-			caches.put(name, c);
-		}
+    @SuppressWarnings("unchecked")
+    public Cache getCache(String name) {
+        Cache c = caches.get(name);
+        if (c == null) {
+            c = new GrailsRedisCache(name, (usePrefix ? cachePrefix.prefix(name) : null), redisTemplate);
+            caches.put(name, c);
+        }
 
-		return c;
-	}
+        return c;
+    }
 
-	public Collection<String> getCacheNames() {
-		return names;
-	}
+    public Collection<String> getCacheNames() {
+        return names;
+    }
 
-	public boolean cacheExists(String name) {
-		return getCacheNames().contains(name);
-	}
+    public boolean cacheExists(String name) {
+        return getCacheNames().contains(name);
+    }
 
-	public boolean destroyCache(String name) {
-		Cache cache = caches.remove(name);
-		if (cache != null) {
-			// TODO remove Redis backing store
-			cache.clear();
-		}
+    public boolean destroyCache(String name) {
+        Cache cache = caches.remove(name);
+        if (cache != null) {
+            // TODO remove Redis backing store
+            cache.clear();
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Sets the cache prefix.
-	 *
-	 * @param prefix the prefix
-	 */
-	public void setCachePrefix(RedisCachePrefix prefix) {
-		cachePrefix = prefix;
-	}
+    /**
+     * Sets the cache prefix.
+     *
+     * @param prefix the prefix
+     */
+    public void setCachePrefix(RedisCachePrefix prefix) {
+        cachePrefix = prefix;
+    }
 
-	/**
-	 * Enable the cache prefix.
-	 */
-	public void setUsePrefix(Boolean use) {
-		usePrefix = use;
-	}
+    /**
+     * Enable the cache prefix.
+     */
+    public void setUsePrefix(Boolean use) {
+        usePrefix = use;
+    }
 
 }

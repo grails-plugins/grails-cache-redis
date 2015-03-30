@@ -14,35 +14,36 @@
  */
 package grails.plugin.cache.web.filter.redis;
 
-import java.io.ByteArrayInputStream;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.serializer.Deserializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
+
+import java.io.ByteArrayInputStream;
 
 /**
  * @author Burt Beckwith
  */
 public class GrailsDeserializingConverter implements Converter<byte[], Object> {
 
-	protected Deserializer<Object> deserializer;
+    protected Deserializer<Object> deserializer;
 
-	public Object convert(byte[] source) {
-		try {
-			return deserializer.deserialize(new ByteArrayInputStream(source));
-		}
-		catch (Throwable t) {
-			throw new SerializationFailedException("Failed to deserialize payload. " +
-					"Is the byte array a result of corresponding serialization for " +
-					deserializer.getClass().getSimpleName() + "?", t);
-		}
-	}
+    public Object convert(byte[] source) {
+        try {
+            return deserializer.deserialize(new ByteArrayInputStream(source));
+        } catch (Throwable t) {
+            throw new SerializationFailedException("Failed to deserialize payload. " +
+                    "Is the byte array a result of corresponding serialization for " +
+                    deserializer.getClass().getSimpleName() + "?", t);
+        }
+    }
 
-	/**
-	 * Dependency injection for the deserializer.
-	 * @param deserializer
-	 */
-	public void setDeserializer(Deserializer<Object> deserializer) {
-		this.deserializer = deserializer;
-	}
+    /**
+     * Dependency injection for the deserializer.
+     *
+     * @param deserializer
+     */
+    public void setDeserializer(Deserializer<Object> deserializer) {
+        this.deserializer = deserializer;
+    }
+
 }

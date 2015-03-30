@@ -23,50 +23,51 @@ import org.springframework.data.redis.serializer.SerializationException;
  */
 public class GrailsRedisSerializer implements RedisSerializer<Object> {
 
-	public static final byte[] EMPTY_ARRAY = new byte[0];
+    public static final byte[] EMPTY_ARRAY = new byte[0];
 
-	protected Converter<Object, byte[]> serializer;
-	protected Converter<byte[], Object> deserializer;
+    protected Converter<Object, byte[]> serializer;
+    protected Converter<byte[], Object> deserializer;
 
-	public Object deserialize(byte[] bytes) {
-		if (bytes == null || bytes.length == 0) {
-			return null;
-		}
+    public Object deserialize(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
 
-		try {
-			return deserializer.convert(bytes);
-		}
-		catch (Exception e) {
-			throw new SerializationException("Cannot deserialize", e);
-		}
-	}
+        try {
+            return deserializer.convert(bytes);
+        } catch (Exception e) {
+            throw new SerializationException("Cannot deserialize", e);
+        }
+    }
 
-	public byte[] serialize(Object object) {
-		if (object == null) {
-			return EMPTY_ARRAY;
-		}
+    public byte[] serialize(Object object) {
+        if (object == null) {
+            return EMPTY_ARRAY;
+        }
 
-		try {
-			return serializer.convert(object);
-		}
-		catch (Exception e) {
-			throw new SerializationException("Cannot serialize", e);
-		}
-	}
+        try {
+            return serializer.convert(object);
+        } catch (Exception e) {
+            throw new SerializationException("Cannot serialize", e);
+        }
+    }
 
-	/**
-	 * Dependency injection for the serializer.
-	 * @param serializer
-	 */
-	public void setSerializer(Converter<Object, byte[]> serializer) {
-		this.serializer = serializer;
-	}
+    /**
+     * Dependency injection for the serializer.
+     *
+     * @param serializer
+     */
+    public void setSerializer(Converter<Object, byte[]> serializer) {
+        this.serializer = serializer;
+    }
 
-	/**
-	 * Dependency injection for the deserializer.
-	 * @param deserializer
-	 */
-	public void setDeserializer(Converter<byte[], Object> deserializer) {
-		this.deserializer = deserializer;
-	}
+    /**
+     * Dependency injection for the deserializer.
+     *
+     * @param deserializer
+     */
+    public void setDeserializer(Converter<byte[], Object> deserializer) {
+        this.deserializer = deserializer;
+    }
+
 }
