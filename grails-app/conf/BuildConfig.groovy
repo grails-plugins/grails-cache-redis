@@ -21,9 +21,9 @@ grails.project.dependency.resolution = {
     }
 
     dependencies {
-        compile 'redis.clients:jedis:2.5.1'
-        compile 'org.springframework:spring-expression:4.0.5.RELEASE'
-        compile 'org.springframework.data:spring-data-redis:1.3.0.RELEASE', {
+        compile 'redis.clients:jedis:2.7.0'
+        compile "org.springframework:spring-expression:$springVersion"
+        compile 'org.springframework.data:spring-data-redis:1.5.0.RELEASE', {
             exclude group: 'org.springframework', name: 'spring-aop'
             exclude group: 'org.springframework', name: 'spring-context-support'
             exclude group: 'org.springframework', name: 'spring-context'
@@ -32,9 +32,9 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build(':release:3.0.1', ':rest-client-builder:2.0.1') {
+        build(':release:3.1.1', ':rest-client-builder:2.1.1') {
             export = false
         }
-        compile ':cache:1.1.6'
+        compile ':cache:1.1.8'
     }
 }
