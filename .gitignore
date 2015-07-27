@@ -1,3 +1,15 @@
+# Eclipse
+.classpath
+.project
+.settings/
+target-eclipse/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+*.ipr
+
 *.zip
 /plugin.xml
 *.log
