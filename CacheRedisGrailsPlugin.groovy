@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import grails.plugin.cache.redis.GrailsRedisCacheManager
 import grails.plugin.cache.web.filter.redis.*
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -32,7 +31,7 @@ class CacheRedisGrailsPlugin {
 
     private final Logger log = LoggerFactory.getLogger('grails.plugin.cache.CacheRedisGrailsPlugin')
 
-    String version = '1.1.2'
+    String version = '1.1.2-SNAPSHOT'
     String grailsVersion = '2.5 > *'
     def loadAfter = ['cache']
     def pluginExcludes = [
@@ -69,6 +68,7 @@ class CacheRedisGrailsPlugin {
         int port = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
         int timeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
         String password = redisCacheConfig.password ?: null
+        Long ttlInSeconds = cacheConfig.ttl ?: GrailsRedisCache.NEVER_EXPIRE
         Boolean isUsePrefix = (redisCacheConfig.usePrefix instanceof Boolean) ? redisCacheConfig.usePrefix : false
         String keySerializerBean = redisCacheConfig.keySerializer instanceof String ?
                 redisCacheConfig.keySerializer : null
@@ -126,6 +126,7 @@ class CacheRedisGrailsPlugin {
 
         grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
             cachePrefix = ref('redisCachePrefix')
+            timeToLive = ttlInSeconds
             usePrefix = isUsePrefix
         }
 

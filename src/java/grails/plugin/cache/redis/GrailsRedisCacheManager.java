@@ -40,6 +40,7 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
     protected final RedisTemplate redisTemplate;
     protected boolean usePrefix;
     protected RedisCachePrefix cachePrefix = new DefaultRedisCachePrefix();
+    protected Long ttl;
 
     public GrailsRedisCacheManager(@SuppressWarnings("rawtypes") RedisTemplate template) {
         redisTemplate = template;
@@ -49,7 +50,7 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
     public Cache getCache(String name) {
         Cache c = caches.get(name);
         if (c == null) {
-            c = new GrailsRedisCache(name, (usePrefix ? cachePrefix.prefix(name) : null), redisTemplate);
+            c = new GrailsRedisCache(name, (usePrefix ? cachePrefix.prefix(name) : null), redisTemplate, ttl);
             caches.put(name, c);
         }
 
@@ -88,6 +89,15 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
      */
     public void setUsePrefix(Boolean use) {
         usePrefix = use;
+    }
+
+    /**
+     * Sets the cache's time to live.
+     *
+     * @param ttl Time to live in seconds.
+     */
+    public void setTimeToLive(Long ttl) {
+        this.ttl = ttl;
     }
 
 }

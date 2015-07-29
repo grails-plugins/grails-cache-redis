@@ -6,6 +6,8 @@ log4j = {
 }
 
 // for tests
+grails.cache.ttl = 10
+
 grails.cache.config = {
     cache {
         name 'fromConfigGroovy1'

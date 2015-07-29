@@ -1,5 +1,12 @@
 Like the core plugin, there are no cache configuration options beyond the cache name. The DSL parser is lenient though, so you can reuse more complex configurations (for example from the richer Ehcache plugin's DSL implementation) and options that aren't valid will be ignored.
 
-{warning}
-Since there is no way to configure "time to live" with this plugin, all cached items have no timeout and remain cached until either the JVM restarts (since the backing store is in-memory) or the cache is partially or fully cleared (by calling a method or action annotated with \@CacheEvict or programmatically).
-{warning}
+h3. TTL
+TTL is supported at a global level by setting the 'grails.cache.ttl' property in Config.groovy equal to a number of seconds.
+
+For example, to set all cache entries to expire in 3 seconds an entry in Config.groovy should look like the following:
+
+{code}
+grails.cache.ttl = 3
+{code}
+
+Without the above configuration the grails-redis-cache plugin will default to never expire a cache entry.
