@@ -16,7 +16,6 @@ package grails.plugin.cache.web.filter.redis;
 
 import grails.plugin.cache.web.PageInfo;
 import grails.plugin.cache.web.filter.PageFragmentCachingFilter;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -39,20 +38,21 @@ public class RedisPageFragmentCachingFilter extends PageFragmentCachingFilter {
 //		return new EhcacheBlockingCache((Ehcache)cache.getNativeCache());
 //	}
 
-	@Override
-	protected int getTimeToLive(ValueWrapper wrapper) {
-		// ttl not supported
-		return Integer.MAX_VALUE;
-	}
+    @Override
+    protected int getTimeToLive(ValueWrapper wrapper) {
+        // ttl not supported
+        return Integer.MAX_VALUE;
+    }
 
-	@Override
-	protected RedisCacheManager getNativeCacheManager() {
-		return (RedisCacheManager)super.getNativeCacheManager();
-	}
+    @Override
+    protected RedisCacheManager getNativeCacheManager() {
+        return (RedisCacheManager) super.getNativeCacheManager();
+    }
 
-	@Override
-	protected void put(Cache cache, String key, PageInfo pageInfo, Integer timeToLiveSeconds) {
-		// just store, ttl not supported
-		cache.put(key, pageInfo);
-	}
+    @Override
+    protected void put(Cache cache, String key, PageInfo pageInfo, Integer timeToLiveSeconds) {
+        // just store, ttl not supported
+        cache.put(key, pageInfo);
+    }
+
 }

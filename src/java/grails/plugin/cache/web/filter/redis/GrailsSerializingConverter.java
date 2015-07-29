@@ -14,39 +14,40 @@
  */
 package grails.plugin.cache.web.filter.redis;
 
-import java.io.ByteArrayOutputStream;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.serializer.Serializer;
 import org.springframework.core.serializer.support.SerializationFailedException;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * @author Burt Beckwith
  */
 public class GrailsSerializingConverter implements Converter<Object, byte[]> {
 
-	protected Serializer<Object> serializer;
+    protected Serializer<Object> serializer;
 
-	/**
-	 * Serializes the source object and returns the byte array result.
-	 */
-	public byte[] convert(Object source) {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(128);
-			serializer.serialize(source, baos);
-			return baos.toByteArray();
-		}
-		catch (Throwable t) {
-			throw new SerializationFailedException("Failed to serialize object using " +
-					serializer.getClass().getSimpleName(), t);
-		}
-	}
+    /**
+     * Serializes the source object and returns the byte array result.
+     */
+    public byte[] convert(Object source) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(128);
+            serializer.serialize(source, baos);
+            return baos.toByteArray();
+        } catch (Throwable t) {
+            throw new SerializationFailedException("Failed to serialize object using " +
+                    serializer.getClass().getSimpleName(), t);
+        }
+    }
 
-	/**
-	 * Dependency injection for the serializer.
-	 * @param serializer
-	 */
-	public void setSerializer(Serializer<Object> serializer) {
-		this.serializer = serializer;
-	}
+    /**
+     * Dependency injection for the serializer.
+     *
+     * @param serializer
+     */
+    public void setSerializer(Serializer<Object> serializer) {
+        this.serializer = serializer;
+    }
+
 }
