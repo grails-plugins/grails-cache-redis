@@ -270,7 +270,11 @@ public class GrailsRedisCache implements GrailsCache {
             if (connection.exists(cacheLockName)) {
                 foundLock = true;
                 try {
-                    Thread.currentThread().wait(WAIT_FOR_LOCK);
+                    Thread thread = Thread.currentThread();
+
+                    synchronized (thread) {
+                        thread.wait(WAIT_FOR_LOCK);
+                    }
                 } catch (InterruptedException ex) {
                     // ignore
                 }
