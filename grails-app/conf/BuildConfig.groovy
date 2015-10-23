@@ -21,7 +21,7 @@ grails.project.dependency.resolution = {
     }
 
     dependencies {
-        compile 'redis.clients:jedis:2.7.0'
+        compile 'redis.clients:jedis:2.7.3'
         compile "org.springframework:spring-expression:$springVersion"
         compile 'org.springframework.data:spring-data-redis:1.5.0.RELEASE', {
             exclude group: 'org.springframework', name: 'spring-aop'
