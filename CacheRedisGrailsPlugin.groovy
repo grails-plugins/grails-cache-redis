@@ -63,12 +63,12 @@ class CacheRedisGrailsPlugin {
 
         def cacheConfig = application.config.grails.cache
         def redisCacheConfig = cacheConfig.redis
-        int database = redisCacheConfig.database ?: 0
-        boolean usePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
-        String hostName = redisCacheConfig.hostName ?: 'localhost'
-        int port = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
-        int timeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
-        String password = redisCacheConfig.password ?: null
+        int configDatabase = redisCacheConfig.database ?: 0
+        boolean configUsePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
+        String configHostName = redisCacheConfig.hostName ?: 'localhost'
+        int configPort = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
+        int configTimeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
+        String configPassword = redisCacheConfig.password ?: null
         Long ttlInSeconds = cacheConfig.ttl ?: GrailsRedisCache.NEVER_EXPIRE
         Boolean isUsePrefix = (redisCacheConfig.usePrefix instanceof Boolean) ? redisCacheConfig.usePrefix : false
         String keySerializerBean = redisCacheConfig.keySerializer instanceof String ?
@@ -78,18 +78,18 @@ class CacheRedisGrailsPlugin {
 
         grailsCacheJedisPoolConfig(JedisPoolConfig)
 
-        grailsCacheJedisShardInfo(JedisShardInfo, hostName, port) {
-            password = password
-            timeout = timeout
+        grailsCacheJedisShardInfo(JedisShardInfo, configHostName, configPort) {
+            password = configPassword
+            connectionTimeout = configTimeout
         }
 
         grailsCacheJedisConnectionFactory(JedisConnectionFactory) {
-            usePool = usePool
-            database = database
-            hostName = hostName
-            port = port
-            timeout = timeout
-            password = password
+            usePool = configUsePool
+            database = configDatabase
+            hostName = configHostName
+            port = configPort
+            timeout = configTimeout
+            password = configPassword
             poolConfig = ref('grailsCacheJedisPoolConfig')
             shardInfo = ref('grailsCacheJedisShardInfo')
         }
