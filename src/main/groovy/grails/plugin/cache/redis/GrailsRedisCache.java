@@ -55,7 +55,8 @@ public class GrailsRedisCache implements GrailsCache {
      *
      * @param name        cache name
      * @param prefix
-     * @param cachePrefix
+     * @param template
+     * @param ttl
      */
     public GrailsRedisCache(String name, byte[] prefix, RedisTemplate<? extends Object, ? extends Object> template, Long ttl) {
         Assert.hasText(name, "non-empty cache name is required");
