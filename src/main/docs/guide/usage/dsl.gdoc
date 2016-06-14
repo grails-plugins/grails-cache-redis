@@ -1,0 +1,5 @@
+Like the core plugin, there are no cache configuration options beyond the cache name. The DSL parser is lenient though, so you can reuse more complex configurations (for example from the richer Ehcache plugin's DSL implementation) and options that aren't valid will be ignored.
+
+{warning}
+Since there is no way to configure "time to live" with this plugin, all cached items have no timeout and remain cached until either the JVM restarts (since the backing store is in-memory) or the cache is partially or fully cleared (by calling a method or action annotated with \@CacheEvict or programmatically).
+{warning}
