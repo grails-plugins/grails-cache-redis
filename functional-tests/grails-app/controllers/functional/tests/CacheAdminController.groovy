@@ -1,3 +1,5 @@
+package functional.tests
+
 import grails.plugin.cache.web.PageInfo
 
 import org.springframework.cache.Cache

@@ -1,3 +1,5 @@
+package functional.tests
+
 class Message {
 	String title
 	String body

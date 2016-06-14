@@ -1,3 +1,5 @@
+package functional.tests
+
 class TaglibController {
 
 	def grailsCacheAdminService

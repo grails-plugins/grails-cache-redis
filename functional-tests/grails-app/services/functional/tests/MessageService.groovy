@@ -1,3 +1,5 @@
+package functional.tests
+
 import java.util.concurrent.ConcurrentHashMap
 
 import javax.annotation.PostConstruct

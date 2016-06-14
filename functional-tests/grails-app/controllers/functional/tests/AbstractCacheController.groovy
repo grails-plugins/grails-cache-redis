@@ -1,3 +1,5 @@
+package functional.tests
+
 import org.springframework.cache.Cache
 
 import grails.converters.JSON

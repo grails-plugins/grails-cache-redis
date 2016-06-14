@@ -1,5 +1,8 @@
+package functional.tests
+
 import grails.plugin.cache.CachePut
 import grails.plugin.cache.Cacheable
+import grails.plugin.cache.CacheEvict
 
 class CachingService {
 
