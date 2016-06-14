@@ -1,21 +1,11 @@
+Thumbs.db
 .DS_Store
-# Eclipse
-.classpath
-.project
-.settings/
-target-eclipse/
-eclipse
-
-# Intellij
-.idea/
+.gradle
+build/
+.idea
 *.iml
-*.iws
 *.ipr
-
-*.log
-/grails-cache-redis-*.zip
-/grails-cache-redis-*.zip.sha1
-/plugin.xml
-/target
-/web-app/WEB-INF
-/docs
+*.iws
+.project
+.settings
+.classpath
