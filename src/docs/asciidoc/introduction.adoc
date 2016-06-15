@@ -1,0 +1,1 @@
+The Grails Cache Redis plugin extends the http://grails.org/plugin/cache[Cache] plugin and uses http://redis.io/[Redis] as the storage provider for cached content. It replaces the core plugin's `grailsCacheManager` bean with one that uses a Redis backend.

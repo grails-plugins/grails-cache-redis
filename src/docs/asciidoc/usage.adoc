@@ -1,0 +1,2 @@
+Although this plugin uses a different backing store than the core plugin, its usage and configuration are the same. You annotate service methods, controller action methods, and taglib closures with the three caching annotations, and configure caches in `Config.groovy` and/or `\*CacheConfig.groovy` artifacts in `grails-app/conf`. See the http://grails-plugins.github.com/grails-cache/[core plugin docs] for general usage information.
+

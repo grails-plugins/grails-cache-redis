@@ -1,0 +1,25 @@
+= Grails Cache Redis
+:version: 2.0.0.BUILD-SNAPSHOT
+:source-highlighter: coderay
+:numbered:
+
+[[introduction]]
+== Introduction To The Cache Redis Plugin
+
+include::introduction.adoc[]
+
+[[changeLog]]
+=== Change log
+
+include::introduction/changeLog.adoc[]
+
+[[usage]]
+== Usage
+
+include::usage.adoc[]
+
+[[dsl]]
+=== Cache DSL
+
+include::usage/dsl.adoc[]
+
