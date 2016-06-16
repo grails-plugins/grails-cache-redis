@@ -54,11 +54,13 @@ dependencies {
     compile "org.hibernate:hibernate-ehcache"
     compile "org.grails.plugins:cache-redis:2.0.0.BUILD-SNAPSHOT"
     console "org.grails:grails-console"
+    compile 'org.grails.plugins:grails-console:2.0.5'
     profile "org.grails.profiles:web:3.1.8"
     runtime "com.bertramlabs.plugins:asset-pipeline-grails:2.8.2"
     runtime "com.h2database:h2"
     testCompile "org.grails:grails-plugin-testing"
     testCompile "org.grails.plugins:geb"
+    testCompile 'org.grails:grails-datastore-rest-client'
     testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
 }

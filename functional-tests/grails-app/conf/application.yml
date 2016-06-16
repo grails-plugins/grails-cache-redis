@@ -117,6 +117,15 @@ grails:
                 scriptlets: html
                 taglib: none
                 staticparts: none
+    cache:
+        config:
+            cache:
+                enabled: true
+                name: message
+                eternal: false
+                overflowToDisk: true
+                maxElementsInMemory: 10000
+                maxElementsOnDisk: 10000000
 endpoints:
     jmx:
         unique-names: true
