@@ -1,10 +1,10 @@
 package grails.plugin.cache.redis
 
+import grails.core.GrailsApplication
 import grails.plugins.*
 import grails.plugin.cache.redis.GrailsRedisCache
 import grails.plugin.cache.redis.GrailsRedisCacheManager
 import grails.plugin.cache.web.filter.redis.*
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.cache.DefaultRedisCachePrefix
@@ -50,12 +50,12 @@ class CacheRedisGrailsPlugin extends Plugin {
 
     Closure doWithSpring() {
         {->
-            if (!isEnabled(application)) {
+            if (!enabled) {
                 log.warn 'Redis Cache plugin is disabled'
                 return
             }
 
-            def cacheConfig = application.config.grails.cache
+            def cacheConfig = grailsApplication.config.grails.cache
             def redisCacheConfig = cacheConfig.redis
             int configDatabase = redisCacheConfig.database ?: 0
             boolean configUsePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
@@ -137,8 +137,8 @@ class CacheRedisGrailsPlugin extends Plugin {
     }
 
     private boolean isEnabled(GrailsApplication application) {
-        // TODO
-        true
+        //TODO cache plugin enabled and this one is..
+        def enabled = application.config.grails.cache.enabled
+        enabled == null || enabled != false
     }
-
 }
