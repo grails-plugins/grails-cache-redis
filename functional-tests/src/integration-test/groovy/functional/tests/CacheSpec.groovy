@@ -22,6 +22,15 @@ class CacheSpec extends GebSpec {
         response.text == 'deleted all LogEntry instances'
     }
 
+    def cleanup() {
+        RestBuilder restBuilder = new RestBuilder()
+        RestResponse response = restBuilder.get("${baseUrl}/test/clearCache?cacheName=message")
+        response.text == "cleared cache 'message'"
+
+        response = restBuilder.get("${baseUrl}/test/clearLogEntries")
+        response.text == 'deleted all LogEntry instances'
+    }
+
     void testCacheAndEvict() {
         given:
             RestBuilder restBuilder = new RestBuilder()
@@ -209,7 +218,7 @@ class CacheSpec extends GebSpec {
             response.text == 'Result: null'
 
         when:
-            response = restBuilder.get("${baseUrl}/cachingService/cachePut?key=band&value=Thin+Lizzy")
+            response = restBuilder.get("${baseUrl}/cachingService/cachePut?key=band&value=Thin Lizzy")
         then:
             response.status == 200
             response.text == 'Result: ** Thin Lizzy **'
@@ -218,7 +227,7 @@ class CacheSpec extends GebSpec {
             response = restBuilder.get("${baseUrl}/cachingService/cacheGet?key=band")
         then:
             response.status == 200
-            response.text == 'Result: ** Thin Lizzy'
+            response.text == 'Result: ** Thin Lizzy **'
 
         when:
             response = restBuilder.get("${baseUrl}/cachingService/cacheGet?key=singer")
@@ -227,7 +236,7 @@ class CacheSpec extends GebSpec {
             response.text == 'Result: null'
 
         when:
-            response = restBuilder.get("${baseUrl}/cachingService/cachePut?key=singer&value=Phil+Lynott")
+            response = restBuilder.get("${baseUrl}/cachingService/cachePut?key=singer&value=Phil Lynott")
         then:
             response.status == 200
             response.text == 'Result: ** Phil Lynott **'
@@ -236,10 +245,10 @@ class CacheSpec extends GebSpec {
             response = restBuilder.get("${baseUrl}/cachingService/cacheGet?key=singer")
         then:
             response.status == 200
-            response.text == 'Result: ** Phil Lynott'
+            response.text == 'Result: ** Phil Lynott **'
 
         when:
-            response = restBuilder.get("${baseUrl}/cachingService/cachePut?key=singer&value=John+Sykes")
+            response = restBuilder.get("${baseUrl}/cachingService/cachePut?key=singer&value=John Sykes")
         then:
             response.status == 200
             response.text == 'Result: ** John Sykes **'
@@ -248,13 +257,13 @@ class CacheSpec extends GebSpec {
             response = restBuilder.get("${baseUrl}/cachingService/cacheGet?key=singer")
         then:
             response.status == 200
-            response.text == 'Result: ** John Sykes'
+            response.text == 'Result: ** John Sykes **'
 
         when:
             response = restBuilder.get("${baseUrl}/cachingService/cacheGet?key=band")
         then:
             response.status == 200
-            response.text == 'Result: ** Thin Lizzy'
+            response.text == 'Result: ** Thin Lizzy **'
     }
 
     void testBlockTag() {
