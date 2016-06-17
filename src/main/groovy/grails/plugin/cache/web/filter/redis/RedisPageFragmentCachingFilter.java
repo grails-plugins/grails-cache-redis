@@ -27,17 +27,6 @@ import org.springframework.data.redis.cache.RedisCacheManager;
  */
 public class RedisPageFragmentCachingFilter extends PageFragmentCachingFilter {
 
-//	@Override
-//	protected void replaceCacheWithDecoratedCache(Cache cache, BlockingCache blocking) {
-//		getNativeCacheManager().replaceCacheWithDecoratedCache(
-//				(Ehcache)cache.getNativeCache(), (Ehcache)blocking.getNativeCache());
-//	}
-
-//	@Override
-//	protected BlockingCache createBlockingCache(Cache cache) {
-//		return new EhcacheBlockingCache((Ehcache)cache.getNativeCache());
-//	}
-
     @Override
     protected int getTimeToLive(ValueWrapper wrapper) {
         // ttl not supported
