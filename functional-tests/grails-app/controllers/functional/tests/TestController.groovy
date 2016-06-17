@@ -1,7 +1,7 @@
 package functional.tests
 
-import org.springframework.cache.annotation.CacheEvict
-import org.springframework.cache.annotation.Cacheable
+import grails.plugin.cache.CacheEvict
+import grails.plugin.cache.Cacheable
 
 class TestController extends AbstractCacheController {
 

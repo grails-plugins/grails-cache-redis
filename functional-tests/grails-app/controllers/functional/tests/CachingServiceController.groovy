@@ -19,4 +19,9 @@ class CachingServiceController {
 	def cacheGet(String key) {
 		render 'Result: ' + cachingService.getData(key)
 	}
+
+	def clear() {
+		cachingService.clear()
+		render 'OK'
+	}
 }
