@@ -56,13 +56,15 @@ class CacheRedisGrailsPlugin {
     def scm = [url: 'https://github.com/grails-plugins/grails-cache-redis']
 
     def doWithSpring = {
-        if (!isEnabled(application)) {
+        def cacheConfig = application.config.grails.cache
+        def redisCacheConfig = cacheConfig.redis
+        boolean pluginEnabled = (redisCacheConfig.enabled instanceof Boolean) ? redisCacheConfig.enabled : true
+
+        if (!pluginEnabled) {
             log.warn 'Redis Cache plugin is disabled'
             return
         }
 
-        def cacheConfig = application.config.grails.cache
-        def redisCacheConfig = cacheConfig.redis
         int configDatabase = redisCacheConfig.database ?: 0
         boolean configUsePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
         String configHostName = redisCacheConfig.hostName ?: 'localhost'
@@ -140,10 +142,4 @@ class CacheRedisGrailsPlugin {
             expressionEvaluator = ref('webExpressionEvaluator')
         }
     }
-
-    private boolean isEnabled(GrailsApplication application) {
-        // TODO
-        true
-    }
-
 }
