@@ -42,7 +42,7 @@ public class GrailsDeserializer implements Deserializer<Object> {
         try {
             return ois.readObject();
         } catch (ClassNotFoundException e) {
-            throw new NestedIOException("Failed to deserialize object type", e);
+            throw new IOException("Failed to deserialize object type", e);
         }
     }
 

@@ -1,13 +1,11 @@
 package grails.plugin.cache.redis
 
-import grails.core.GrailsApplication
-import grails.plugins.*
-import grails.plugin.cache.redis.GrailsRedisCache
-import grails.plugin.cache.redis.GrailsRedisCacheManager
+import grails.config.Config
 import grails.plugin.cache.web.filter.redis.*
+import grails.plugins.Plugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.redis.cache.DefaultRedisCachePrefix
+import org.springframework.data.redis.cache.CacheKeyPrefix
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import redis.clients.jedis.JedisPoolConfig
@@ -21,7 +19,7 @@ class CacheRedisGrailsPlugin extends Plugin {
 
     private final Logger log = LoggerFactory.getLogger('grails.plugin.cache.CacheRedisGrailsPlugin')
 
-    def grailsVersion = "3.0.0 > *"
+    def grailsVersion = "6.2.0 > *"
     def loadAfter = ['cache']
     def pluginExcludes = [
             'grails-app/conf/*CacheConfig.groovy',
@@ -43,33 +41,33 @@ class CacheRedisGrailsPlugin extends Plugin {
     def developers = [
             [name: "Burt Beckwith", email: 'burt@burtbeckwith.com'],
             [name: 'Costin Leau'],
-            [name: 'Colin Harrington', email:'colin.harrington@gmail.com']
+            [name: 'Colin Harrington', email: 'colin.harrington@gmail.com'],
+            [name: 'Søren Berg Glasius', email: 'soeren@glasius.dk'],
     ]
     def issueManagement = [system: 'github', url: 'https://github.com/grails-plugins/grails-cache-redis/issues']
     def scm = [url: 'https://github.com/grails-plugins/grails-cache-redis']
 
     Closure doWithSpring() {
-        {->
-            def cacheConfig = grailsApplication.config.grails.cache
-            def redisCacheConfig = cacheConfig.redis
-			boolean pluginEnabled = (redisCacheConfig.enabled instanceof Boolean) ? redisCacheConfig.enabled : true
+        { ->
+            Config config = grailsApplication.config
+
+            boolean pluginEnabled = config.getProperty('grails.cache.redis.enabled', Boolean, Boolean.TRUE)
             if (!pluginEnabled) {
                 log.warn 'Redis Cache plugin is disabled'
                 return
             }
 
-            int configDatabase = redisCacheConfig.database ?: 0
-            boolean configUsePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
-            String configHostName = redisCacheConfig.hostName ?: 'localhost'
-            int configPort = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
-            int configTimeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
-            String configPassword = redisCacheConfig.password ?: null
-            Long ttlInSeconds = cacheConfig.ttl ?: GrailsRedisCache.NEVER_EXPIRE
-            Boolean isUsePrefix = (redisCacheConfig.usePrefix instanceof Boolean) ? redisCacheConfig.usePrefix : false
-            String keySerializerBean = redisCacheConfig.keySerializer instanceof String ?
-                    redisCacheConfig.keySerializer : null
-            String hashKeySerializerBean = redisCacheConfig.hashKeySerializer instanceof String ?
-                    redisCacheConfig.hashKeySerializer : null
+            int configDatabase = config.getProperty('grails.cache.redis.database', Integer, 0)
+            boolean configUsePool = config.getProperty('grails.cache.redis.usePool', Boolean, true)
+            String configHostName = config.getProperty('grails.cache.redis.hostName', 'localhost')
+            int configPort = config.getProperty('grails.cache.redis.port', Integer, Protocol.DEFAULT_PORT)
+            int configTimeout = config.getProperty('grails.cache.redis.timeout', Integer, Protocol.DEFAULT_TIMEOUT)
+            String configPassword = config.getProperty('grails.cache.redis.password')
+            Long ttlInSeconds = config.getProperty('grails.cache.redis.ttl', Long, GrailsRedisCache.NEVER_EXPIRE)
+            boolean isUsePrefix = config.getProperty('grails.cache.redis.usePrefix', Boolean, false)
+
+            String keySerializerBean = config.getProperty('grails.cache.redis.keySerializer')
+            String hashKeySerializerBean = config.getProperty('grails.cache.redis.hashKeySerializer')
 
             grailsCacheJedisPoolConfig(JedisPoolConfig)
 
@@ -117,47 +115,17 @@ class CacheRedisGrailsPlugin extends Plugin {
                     hashKeySerializer = ref(hashKeySerializerBean)
             }
 
-            String delimiter = redisCacheConfig.cachePrefixDelimiter ?: ':'
-            redisCachePrefix(DefaultRedisCachePrefix, delimiter)
+            String delimiter = config.getProperty('grails.cache.redis.cachePrefixDelimiter', CacheKeyPrefix.SEPARATOR)
+            String prefix = config.getProperty('grails.cache.redis.cachePrefix', '')
+
+            redisCachePrefix(DelimiterCacheKeyPrefix, delimiter, prefix)
 
             grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
-                cachePrefix = ref('redisCachePrefix')
+                cachePrefix = ref('redisCachePrefix', false)
                 timeToLive = ttlInSeconds
                 usePrefix = isUsePrefix
             }
-
-			/*
-			 * DOC - !!!!!!!!!!!
-			 * 
-			 * This is commented out because it introduces a bug causing NullPointerException for file upload, 
-			 * so we don't want to use the `RedisPageFragmentCachingFilter` implementation, but use the default one instead.
-			 * 
-			 * The bug is: when we do a file upload, we can get the file in the controler by `params.attachmentFile`.
-			 * That is how we code it in almost every place in DECK. However, when grails cache redis is enabled,
-			 * the `RedisPageFragmentCachingFilter` implementation would massage the request while doing its caching work,
-			 * but somehow missed the `attachmentFile`, and `params.attachmentFile` in a controller would be empty.
-			 * There is a work-around that we can get the file by calling `request.getMultipartFiles()`, but we have to
-			 * change it for every single place in DECK, which isn't ideal.
-			 * 
-			 * So this is the bug fix. Also this plugin version is based on an old version of grails-cache plugin - 3.0.3.
-			 * grails-cache 4.0 has a very different implementation and hopefully this is no longer an issue.
-			 * Will check it out when we upgrade to Grails 4.
-			 * 
-			 */
-//            grailsCacheFilter(RedisPageFragmentCachingFilter) {
-//                cacheManager = ref('grailsCacheManager')
-//                nativeCacheManager = ref('grailsCacheRedisTemplate')
-//                // TODO this name might be brittle - perhaps do by type?
-//                cacheOperationSource = ref('org.springframework.cache.annotation.AnnotationCacheOperationSource#0')
-//                keyGenerator = ref('webCacheKeyGenerator')
-//                expressionEvaluator = ref('webExpressionEvaluator')
-//            }
         }
     }
 
-    private boolean isEnabled(GrailsApplication application) {
-        //TODO cache plugin enabled and this one is..
-        def enabled = application.config.grails.cache.enabled
-        enabled == null || enabled != false
-    }
 }

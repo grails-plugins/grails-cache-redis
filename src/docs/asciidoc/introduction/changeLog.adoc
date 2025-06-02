@@ -4,3 +4,7 @@
 
 === Version 1.0.0.M2 - May 12, 2012
 
+=== Version 6.0.0 - June 2, 2025
+
+* Upgraded to Grails 6.2.x
+

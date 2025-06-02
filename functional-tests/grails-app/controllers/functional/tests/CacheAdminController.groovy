@@ -1,6 +1,5 @@
 package functional.tests
 
-import grails.plugin.cache.web.PageInfo
 
 import org.springframework.cache.Cache
 
@@ -27,7 +26,7 @@ class CacheAdminController {
 			for (key in cache.allKeys) {
 				def value = cache.get(key)?.get()
 				String html
-				if (value instanceof PageInfo) {
+				if (value instanceof Object) {
 					html = new String(value.ungzippedBody, response.characterEncoding)
 				}
 				data << [key: key, value: value, html: html]

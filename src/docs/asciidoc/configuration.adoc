@@ -1,0 +1,76 @@
+The following configurations are available:
+
+All configuration values are prefixed with `grails.cache.redis`
+|===
+|Key |Default | Type |Description
+
+|`enabled` 
+|`true`
+|`boolean`
+|Disables or enables the Redis cache implementation (aka. initiates the needed services)
+
+|`database` 
+|`true`
+|`integer`
+|Redis database to use
+
+|`usePool`
+|`true`
+|`boolean`
+|Use the Redis connection pool
+
+|`hostName`
+|`localhost`
+|`String`
+|Server name to connect to
+
+|`port`
+|`6379`
+|`integer`
+|Server port to connect to
+
+
+|`password`
+|(not set)
+|`String`
+|Server password (only if required)
+
+|`timeout`
+|`2000`
+|`integer`
+|Connection timeout 
+
+|`ttl`
+|`0` (never expires)
+|`integer`
+|All caches timeout in seconds 
+
+|`keySerializer`
+|(not set)
+|`String`
+|Name of Key Serializer bean.
+
+|`hashKeySerializerBean`
+|(not set)
+|`String`
+|Name of Hash Key Serializer bean.
+
+|`usePrefix`
+|`false`
+|`boolean`
+|Use key prefix and delimiter
+
+
+|`cachePrefixDelimiter`
+|`::`
+|`String`
+|Key prefix delimiter (only used if `usePrefix` is set to `true`)
+
+|`prefix`
+|<empty string>
+|`String`
+|Key prefix (only used if `usePrefix` is set to `true`)
+
+|===
+
+*Note:* There is currently no way of setting each cache configuration individually. 
