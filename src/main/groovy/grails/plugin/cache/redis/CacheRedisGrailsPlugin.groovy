@@ -6,10 +6,10 @@ import grails.plugins.Plugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.cache.CacheKeyPrefix
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.JedisShardInfo
 import redis.clients.jedis.Protocol
 
 /**
@@ -62,6 +62,7 @@ class CacheRedisGrailsPlugin extends Plugin {
             String configHostName = config.getProperty('grails.cache.redis.hostName', 'localhost')
             int configPort = config.getProperty('grails.cache.redis.port', Integer, Protocol.DEFAULT_PORT)
             int configTimeout = config.getProperty('grails.cache.redis.timeout', Integer, Protocol.DEFAULT_TIMEOUT)
+            String configUsername = config.getProperty('grails.cache.redis.username')
             String configPassword = config.getProperty('grails.cache.redis.password')
             Long ttlInSeconds = config.getProperty('grails.cache.redis.ttl', Long, GrailsRedisCache.NEVER_EXPIRE)
             boolean isUsePrefix = config.getProperty('grails.cache.redis.usePrefix', Boolean, false)
@@ -69,22 +70,20 @@ class CacheRedisGrailsPlugin extends Plugin {
             String keySerializerBean = config.getProperty('grails.cache.redis.keySerializer')
             String hashKeySerializerBean = config.getProperty('grails.cache.redis.hashKeySerializer')
 
-            grailsCacheJedisPoolConfig(JedisPoolConfig)
+            grailsCacheRedisPoolConfig(JedisPoolConfig)
 
-            grailsCacheJedisShardInfo(JedisShardInfo, configHostName, configPort) {
-                password = configPassword
-                connectionTimeout = configTimeout
+            grailsCacheRedisConfiguration(RedisStandaloneConfiguration, configHostName, configPort) {
+                username = configUsername
+                if(configPassword) {
+                    password = configPassword
+                }
+                database = configDatabase
             }
 
-            grailsCacheJedisConnectionFactory(JedisConnectionFactory) {
+            grailsCacheJedisConnectionFactory(JedisConnectionFactory, ref('grailsCacheRedisConfiguration')) {
                 usePool = configUsePool
-                database = configDatabase
-                hostName = configHostName
-                port = configPort
                 timeout = configTimeout
-                password = configPassword
-                poolConfig = ref('grailsCacheJedisPoolConfig')
-                shardInfo = ref('grailsCacheJedisShardInfo')
+                poolConfig = ref('grailsCacheRedisPoolConfig')
             }
 
             grailsRedisCacheSerializer(GrailsSerializer)
@@ -118,10 +117,10 @@ class CacheRedisGrailsPlugin extends Plugin {
             String delimiter = config.getProperty('grails.cache.redis.cachePrefixDelimiter', CacheKeyPrefix.SEPARATOR)
             String prefix = config.getProperty('grails.cache.redis.cachePrefix', '')
 
-            redisCachePrefix(DelimiterCacheKeyPrefix, delimiter, prefix)
+            grailsRedisCachePrefix(DelimiterCacheKeyPrefix, delimiter, prefix)
 
             grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
-                cachePrefix = ref('redisCachePrefix', false)
+                cachePrefix = ref('grailsRedisCachePrefix', false)
                 timeToLive = ttlInSeconds
                 usePrefix = isUsePrefix
             }

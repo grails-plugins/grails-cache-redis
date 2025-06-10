@@ -29,6 +29,10 @@ All configuration values are prefixed with `grails.cache.redis`
 |`integer`
 |Server port to connect to
 
+|`username`
+|(not set)
+|`String`
+|Server username (only if required)
 
 |`password`
 |(not set)
@@ -74,3 +78,12 @@ All configuration values are prefixed with `grails.cache.redis`
 |===
 
 *Note:* There is currently no way of setting each cache configuration individually. 
+
+=== Advanced configuration
+
+The standard configuration will use `org.springframework.data.redis.connection.RedisStandaloneConfiguration` and will connect to a single server. This configuration is instanticated as a the `grailsCacheRedisConfiguration` bean. If more advance configuration is needed, consider using `org.springframework.data.redis.connection.RedisClusterConfiguration` or `org.springframework.data.redis.connection.RedisSentinelConfiguration` instead.
+
+This should be archiveable by adding:
+
+----
+grailsCacheRedisConfiguration(RedisClusterConfiguration,)

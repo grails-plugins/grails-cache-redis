@@ -7,4 +7,6 @@
 === Version 6.0.0 - June 2, 2025
 
 * Upgraded to Grails 6.2.x
+* Removed `JedisShardInfo` in plugin descriptor in favor of `RedisStandaloneConfiguration`
+* Updated documentation
 

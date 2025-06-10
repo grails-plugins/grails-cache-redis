@@ -18,13 +18,13 @@ include::introduction/changeLog.adoc[]
 
 include::usage.adoc[]
 
-
 [[configuration]]
 == Configuration
+
 include::configuration.adoc[]
 
 [[dsl]]
-=== Cache DSL
+== Cache DSL
 
 include::usage/dsl.adoc[]
 
