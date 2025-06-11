@@ -1,0 +1,132 @@
+import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
+
+ext.set('signing.keyId', findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY'))
+ext.set('signing.password', findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE'))
+
+def javaComponent = components.named('java')
+publishing {
+    publications {
+        register('grailsMailPlugin', MavenPublication) {
+            from javaComponent.get()
+            versionMapping {
+                usage('java-api') { fromResolutionOf('runtimeClasspath') }
+                usage('java-runtime') { fromResolutionResult() }
+            }
+            pom {
+                name = 'Grails Cache Redis plugin'
+                description = 'Provides setup for Redis caching'
+                url = 'https://github.com/grails/grails-cache-redis'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'graemerocher'
+                        name = 'Graeme Rocher'
+                        email = 'graeme.rocher@gmail.com'
+                    }
+                    developer {
+                        id = 'donbeave'
+                        name = 'Alexey Zhokhov'
+                        email = 'alexey@zhokhov.com'
+                    }
+                    developer {
+                        id = 'iamedu'
+                        name = 'Eduardo Díaz'
+                        email = 'iamedu@gmail.com'
+                    }
+                    developer {
+                        id = 'jeff-blaisdell'
+                        name = 'Jeff Blaisdell'
+                        email = 'jeff.blaisdell@gmail.com'
+                    }
+                    developer {
+                        id = 'jeffscottbrown'
+                        name = 'Jeff Scott Brown'
+                        email = 'brownj@ociweb.com'
+                    }
+                    developer {
+                        id = 'johnSpiekerpoint'
+                        name = 'John Spiekerpoint'
+                        email = 'john@spiekerpoint.com'
+                    }
+                    developer {
+                        id = 'erik-h'
+                        name = 'Erik Haugrud'
+                        email = 'erik-h@users.noreply.github.com'
+                    }
+                    developer {
+                        id = 'ColinHarrington'
+                        name = 'Colin Harrington'
+                        email = 'colin.harrington@gmail.com'
+                    }
+                    developer {
+                        id = 'sbglasius'
+                        name = 'Søren Berg Glasius'
+                        email = 'soeren@glasius.dk'
+                    }
+
+
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/grails/grails-cache-redis.git'
+                    developerConnection = 'scm:git:ssh://github.com:grails/grails-cache-redis.git'
+                    url = 'https://github.com/grails/grails-cache-redis'
+                }
+            }
+            // dependency management shouldn't be included
+            pom.withXml {
+                def root = it.asElement()
+                root.getElementsByTagName('dependencyManagement').each { root.removeChild(it) }
+            }
+        }
+    }
+
+    if (isSnapshot) {
+        repositories {
+            maven {
+                credentials {
+                    username = findProperty('artifactoryPublishUsername') ?: ''
+                    password = findProperty('artifactoryPublishPassword') ?: ''
+                }
+                url = uri('https://repo.grails.org/grails/plugins3-snapshots-local')
+            }
+        }
+    }
+}
+
+def mavenPublication = extensions.findByType(PublishingExtension).publications.named('grailsMailPlugin')
+tasks.withType(Sign).configureEach {
+    onlyIf { isReleaseVersion }
+}
+afterEvaluate {
+    signing {
+        required = { isReleaseVersion }
+        sign(mavenPublication.get())
+    }
+}
+
+if (isReleaseVersion) {
+    nexusPublishing {
+        String sonatypeUsername = findProperty('sonatypeUsername') ?: ''
+        String sonatypePassword = findProperty('sonatypePassword') ?: ''
+        String sonatypeStagingProfileId = findProperty('sonatypeStagingProfileId') ?: ''
+        repositories {
+            sonatype {
+                nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
+                username = sonatypeUsername
+                password = sonatypePassword
+                stagingProfileId = sonatypeStagingProfileId
+            }
+        }
+    }
+}
+
+
+//do not generate extra load on Nexus with new staging repository if signing fails
+tasks.withType(InitializeNexusStagingRepository).configureEach {
+    shouldRunAfter = tasks.withType(Sign)
+}

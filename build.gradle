@@ -1,26 +1,19 @@
-buildscript {
-    repositories {
-        maven { url "https://repo.grails.org/grails/core" }
-        mavenCentral()
-    }
-    dependencies { // Not Published to Gradle Plugin Portal
-        classpath "org.grails:grails-gradle-plugin:6.2.4"
-        classpath "org.grails.plugins:hibernate5:8.1.0"
-    }
-}
-
 plugins {
-    id "groovy"
-    id "war"
-    id "idea"
-    id "application"
-    id "eclipse"
-    id 'org.asciidoctor.jvm.convert' version '4.0.2'
+    id 'groovy'
+    id 'java-library'
+    id 'io.github.gradle-nexus.publish-plugin'
+    id 'maven-publish'
+    id 'signing'
+    id 'org.asciidoctor.jvm.convert'
 }
 
-// Not Published to Gradle Plugin Portal
-apply plugin: "org.grails.grails-plugin"
-//apply plugin:"org.grails.grails-plugin-publish"
+version = projectVersion
+group = 'org.grails.plugins'
+ext.set('grailsVersion', libs.versions.grails.asProvider().get())
+ext.set('isReleaseVersion', !version.toString().endsWith('-SNAPSHOT'))
+ext.set('isSnapshot', !isReleaseVersion)
+
+apply plugin: 'org.grails.grails-plugin' // Needs to be applied after grailsVersion has been set
 
 
 repositories {
@@ -29,58 +22,40 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.springframework.boot:spring-boot-starter-logging'
-    compileOnly 'org.springframework.boot:spring-boot-autoconfigure'
-    compileOnly 'org.springframework.boot:spring-boot-starter-actuator'
-    compileOnly 'org.springframework.boot:spring-boot-starter-tomcat'
-    compileOnly "org.grails:grails-dependencies"
-    compileOnly "org.grails:grails-web-boot"
-    implementation "org.grails:grails-core"
-    implementation "org.grails.plugins:cache"
-    console "org.grails:grails-console"
-    profile "org.grails.profiles:plugin"
-    compileOnly "org.grails:grails-plugin-services"
-    compileOnly "org.grails:grails-plugin-domain-class"
-    testImplementation "org.grails:grails-test"
-    testImplementation "org.grails:grails-testing-support"
 
-    implementation 'redis.clients:jedis:3.8.0'
-    implementation 'org.springframework.data:spring-data-redis'
+    implementation libs.groovy.core 
+    implementation libs.spring.context 
+    implementation libs.spring.context.support 
 
-    testImplementation 'net.bytebuddy:byte-buddy:1.14.18'
+    implementation libs.grails.core
+    implementation libs.grails.cache
+
+    implementation libs.spring.beans
+    implementation libs.springboot.autoconfigure
+
+    implementation libs.jedis.client
+    implementation libs.spring.data.redis
+
+    testImplementation libs.grails.testing.support.core
+    testImplementation libs.spock.core
+
+    integrationTestImplementation libs.spring.web
+
+    integrationTestRuntimeOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during test task
+    integrationTestRuntimeOnly libs.springboot.starter.tomcat
+    
+    testImplementation libs.bytebudy
 }
 
-//grailsPublish {
-//    // TODO: Provide values here
-//    user = 'user'
-//    key = 'key'
-//    githubSlug = 'foo/bar'
-//    license {
-//        name = 'Apache-2.0'
-//    }
-//    title = "My Plugin"
-//    desc = "Full plugin description"
-//    developers = [johndoe:"John Doe"]
-//    portalUser = ""
-//    portalPassword = ""    
-//}
-
-asciidoctor {
-    resources {
-        from('src/docs/images')
-        into "./images"
-    }
-
-    attributes 'experimental': 'true',
-            'compat-mode': 'true',
-            'toc': 'left',
-            'icons': 'font',
-            'version': project.version,
-            'sourcedir': "/src/main/groovy"
-}
-
-tasks.register('docs') { dependsOn asciidoctor }
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
 }
+
+apply from: layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: layout.projectDirectory.file('gradle/grails-plugin-config.gradle')
+apply from: layout.projectDirectory.file('gradle/docs-config.gradle')
+apply from: layout.projectDirectory.file('gradle/publishing.gradle')

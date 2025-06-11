@@ -1,0 +1,29 @@
+[versions]
+grails = '6.2.0'
+grails-testing-support = '3.2.1'
+groovy = '3.0.21'
+cache = '5.0.1'
+spring-data-redis = '2.7.18'
+jedis = '5.2.0'
+bytebudy = '1.14.18'
+slf4j = '1.7.36'
+spring = '5.3.34'
+springboot = '2.7.18'
+spock = '2.3-groovy-3.0'
+
+[libraries]
+grails-core = { module = 'org.grails:grails-core', version.ref = 'grails' }
+grails-cache = { module = 'org.grails.plugins:cache', version.ref = 'cache' }
+spring-data-redis = { module = 'org.springframework.data:spring-data-redis', version.ref = 'spring-data-redis' }
+jedis-client = { module = 'redis.clients:jedis', version.ref = 'jedis' }
+bytebudy = { module = 'net.bytebuddy:byte-buddy', version.ref = 'bytebudy' }
+groovy-core = { module = 'org.codehaus.groovy:groovy', version.ref = 'groovy' }
+slf4j-nop = { module = 'org.slf4j:slf4j-nop', version.ref = 'slf4j' }
+spring-beans = { module = 'org.springframework:spring-beans', version.ref = 'spring' }
+spring-context = { module = 'org.springframework:spring-context', version.ref = 'spring' }
+spring-context-support = { module = 'org.springframework:spring-context-support', version.ref = 'spring' }
+spring-web = { module = 'org.springframework:spring-web', version.ref = 'spring' }
+springboot-autoconfigure = { module = 'org.springframework.boot:spring-boot-autoconfigure', version.ref = 'springboot' }
+springboot-starter-tomcat = { module = 'org.springframework.boot:spring-boot-starter-tomcat', version.ref = 'springboot' }
+spock-core = { module = 'org.spockframework:spock-core', version.ref = 'spock' }
+grails-testing-support-core = { module = 'org.grails:grails-testing-support', version.ref = 'grails-testing-support' }
