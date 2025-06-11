@@ -40,12 +40,6 @@ dependencies {
 
     testImplementation libs.grails.testing.support.core
     testImplementation libs.spock.core
-
-    integrationTestImplementation libs.spring.web
-
-    integrationTestRuntimeOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during test task
-    integrationTestRuntimeOnly libs.springboot.starter.tomcat
-    
     testImplementation libs.bytebudy
 }
 
