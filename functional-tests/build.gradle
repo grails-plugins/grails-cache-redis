@@ -1,75 +1,59 @@
 buildscript {
-    ext {
-        grailsVersion = project.grailsVersion
-    }
     repositories {
-        mavenLocal()
         maven { url "https://repo.grails.org/grails/core" }
+        mavenCentral()
     }
-    dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.8.2"
-        classpath "org.grails.plugins:hibernate4:5.0.6"
+    dependencies { // Not Published to Gradle Plugin Portal
+        classpath "org.grails:grails-gradle-plugin:6.2.4"
+        classpath "org.grails.plugins:hibernate5:8.1.0"
     }
 }
 
-version "0.1"
-group "functional.tests"
-
-apply plugin:"eclipse"
-apply plugin:"idea"
-apply plugin:"war"
-apply plugin:"org.grails.grails-web"
-apply plugin:"org.grails.grails-gsp"
-apply plugin:"asset-pipeline"
-
-ext {
-    grailsVersion = project.grailsVersion
-    gradleWrapperVersion = project.gradleWrapperVersion
+plugins {
+    id "groovy"
+    id "war"
+    id "idea"
+    id "application"
+    id "eclipse"
 }
+
+// Not Published to Gradle Plugin Portal
+apply plugin: "org.grails.grails-web"
+apply plugin: "org.grails.grails-gsp"
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.grails:grails-bom:$grailsVersion"
-    }
-    applyMavenExclusions false
-}
-
 dependencies {
-    compile "org.springframework.boot:spring-boot-starter-logging"
-    compile "org.springframework.boot:spring-boot-autoconfigure"
-    compile "org.grails:grails-core"
-    compile "org.springframework.boot:spring-boot-starter-actuator"
-    compile "org.springframework.boot:spring-boot-starter-tomcat"
-    compile "org.grails:grails-dependencies"
-    compile "org.grails:grails-web-boot"
-    compile "org.grails.plugins:cache"
-    compile "org.grails.plugins:scaffolding"
-    compile "org.grails.plugins:hibernate4"
-    compile "org.hibernate:hibernate-ehcache"
-    compile rootProject
+    implementation "org.springframework.boot:spring-boot-starter-logging"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.grails:grails-core"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+    implementation "org.grails:grails-dependencies"
+    implementation "org.grails:grails-web-boot"
+    implementation "org.grails.plugins:cache"
+    implementation "org.grails.plugins:hibernate5"
+    implementation "org.hibernate:hibernate-ehcache"
+    implementation rootProject
     console "org.grails:grails-console"
-    compile 'org.grails.plugins:grails-console:2.0.5'
-    profile "org.grails.profiles:web:3.1.8"
-    runtime "com.bertramlabs.plugins:asset-pipeline-grails:2.8.2"
-    runtime "com.h2database:h2"
-    testCompile "org.grails:grails-plugin-testing"
-    testCompile "org.grails.plugins:geb"
-    testCompile 'org.grails:grails-datastore-rest-client'
-    testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
-    testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
+    profile "org.grails.profiles:web"
+    runtimeOnly "com.h2database:h2"
+    testImplementation "org.grails:grails-test"
+    testImplementation "io.micronaut:micronaut-inject-groovy"
+    testImplementation "io.micronaut:micronaut-http-client"
+    testImplementation "org.grails:grails-web-testing-support"
+    testImplementation "org.spockframework:spock-core"
+    
+    testImplementation 'org.testcontainers:spock:1.21.1'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = gradleWrapperVersion
+java {
+    sourceCompatibility = JavaVersion.toVersion("11")
 }
-
-assets {
-    minifyJs = true
-    minifyCss = true
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }

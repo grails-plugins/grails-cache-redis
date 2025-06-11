@@ -5,9 +5,11 @@ import grails.plugin.cache.Cacheable
 
 class TestController extends AbstractCacheController {
 
+	LogEntryDataService logEntryDataService
+	
 	@Cacheable('message')
 	def index() {
-		new LogEntry(message: 'Called index() action').save(failOnError: true, flush: true)
+		logEntryDataService.save(new LogEntry(message: 'Called index() action'))
 		render 'index'
 	}
 
@@ -18,7 +20,7 @@ class TestController extends AbstractCacheController {
 
 	@CacheEvict(value='message', allEntries=true)
 	def evict() {
-		new LogEntry(message: 'Called evict() action').save(failOnError: true, flush: true)
+		logEntryDataService.save(new LogEntry(message: 'Called evict() action'))
 		render 'evict'
 	}
 }

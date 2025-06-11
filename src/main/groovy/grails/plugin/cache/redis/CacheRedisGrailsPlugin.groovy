@@ -1,17 +1,21 @@
 package grails.plugin.cache.redis
 
-import grails.core.GrailsApplication
-import grails.plugins.*
-import grails.plugin.cache.redis.GrailsRedisCache
-import grails.plugin.cache.redis.GrailsRedisCacheManager
-import grails.plugin.cache.web.filter.redis.*
+import grails.config.Config
+import grails.plugin.cache.redis.internal.DelimiterCacheKeyPrefix
+import grails.plugin.cache.redis.internal.GrailsDeserializer
+import grails.plugin.cache.redis.internal.GrailsDeserializingConverter
+import grails.plugin.cache.redis.internal.GrailsRedisKeySerializer
+import grails.plugin.cache.redis.internal.GrailsRedisSerializer
+import grails.plugin.cache.redis.internal.GrailsSerializer
+import grails.plugin.cache.redis.internal.GrailsSerializingConverter
+import grails.plugins.Plugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.redis.cache.DefaultRedisCachePrefix
+import org.springframework.data.redis.cache.CacheKeyPrefix
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.JedisShardInfo
 import redis.clients.jedis.Protocol
 
 /**
@@ -21,7 +25,7 @@ class CacheRedisGrailsPlugin extends Plugin {
 
     private final Logger log = LoggerFactory.getLogger('grails.plugin.cache.CacheRedisGrailsPlugin')
 
-    def grailsVersion = "3.0.0 > *"
+    def grailsVersion = "6.2.0 > *"
     def loadAfter = ['cache']
     def pluginExcludes = [
             'grails-app/conf/*CacheConfig.groovy',
@@ -35,7 +39,7 @@ class CacheRedisGrailsPlugin extends Plugin {
 
     def author = "Burt Beckwith"
     def authorEmail = "burt@burtbeckwith.com"
-    
+
     def profiles = ['web']
 
     String documentation = 'http://grails-plugins.github.io/grails-cache-redis/'
@@ -43,49 +47,49 @@ class CacheRedisGrailsPlugin extends Plugin {
     def developers = [
             [name: "Burt Beckwith", email: 'burt@burtbeckwith.com'],
             [name: 'Costin Leau'],
-            [name: 'Colin Harrington', email:'colin.harrington@gmail.com']
+            [name: 'Colin Harrington', email: 'colin.harrington@gmail.com'],
+            [name: 'Søren Berg Glasius', email: 'soeren@glasius.dk'],
     ]
     def issueManagement = [system: 'github', url: 'https://github.com/grails-plugins/grails-cache-redis/issues']
     def scm = [url: 'https://github.com/grails-plugins/grails-cache-redis']
 
     Closure doWithSpring() {
-        {->
-            if (!enabled) {
+        { ->
+            Config config = grailsApplication.config
+
+            boolean pluginEnabled = config.getProperty('grails.cache.redis.enabled', Boolean, Boolean.TRUE)
+            if (!pluginEnabled) {
                 log.warn 'Redis Cache plugin is disabled'
                 return
             }
 
-            def cacheConfig = grailsApplication.config.grails.cache
-            def redisCacheConfig = cacheConfig.redis
-            int configDatabase = redisCacheConfig.database ?: 0
-            boolean configUsePool = (redisCacheConfig.usePool instanceof Boolean) ? redisCacheConfig.usePool : true
-            String configHostName = redisCacheConfig.hostName ?: 'localhost'
-            int configPort = redisCacheConfig.port ?: Protocol.DEFAULT_PORT
-            int configTimeout = redisCacheConfig.timeout ?: Protocol.DEFAULT_TIMEOUT
-            String configPassword = redisCacheConfig.password ?: null
-            Long ttlInSeconds = cacheConfig.ttl ?: GrailsRedisCache.NEVER_EXPIRE
-            Boolean isUsePrefix = (redisCacheConfig.usePrefix instanceof Boolean) ? redisCacheConfig.usePrefix : false
-            String keySerializerBean = redisCacheConfig.keySerializer instanceof String ?
-                    redisCacheConfig.keySerializer : null
-            String hashKeySerializerBean = redisCacheConfig.hashKeySerializer instanceof String ?
-                    redisCacheConfig.hashKeySerializer : null
+            int configDatabase = config.getProperty('grails.cache.redis.database', Integer, 0)
+            boolean configUsePool = config.getProperty('grails.cache.redis.usePool', Boolean, true)
+            String configHostName = config.getProperty('grails.cache.redis.hostName', 'localhost')
+            int configPort = config.getProperty('grails.cache.redis.port', Integer, Protocol.DEFAULT_PORT)
+            int configTimeout = config.getProperty('grails.cache.redis.timeout', Integer, Protocol.DEFAULT_TIMEOUT)
+            String configUsername = config.getProperty('grails.cache.redis.username')
+            String configPassword = config.getProperty('grails.cache.redis.password')
+            Long ttlInSeconds = config.getProperty('grails.cache.redis.ttl', Long, GrailsRedisCache.NEVER_EXPIRE)
+            boolean isUsePrefix = config.getProperty('grails.cache.redis.usePrefix', Boolean, false)
 
-            grailsCacheJedisPoolConfig(JedisPoolConfig)
+            String keySerializerBean = config.getProperty('grails.cache.redis.keySerializer')
+            String hashKeySerializerBean = config.getProperty('grails.cache.redis.hashKeySerializer')
 
-            grailsCacheJedisShardInfo(JedisShardInfo, configHostName, configPort) {
-                password = configPassword
-                connectionTimeout = configTimeout
+            grailsCacheRedisPoolConfig(JedisPoolConfig)
+
+            grailsCacheRedisConfiguration(RedisStandaloneConfiguration, configHostName, configPort) {
+                username = configUsername
+                if(configPassword) {
+                    password = configPassword
+                }
+                database = configDatabase
             }
 
-            grailsCacheJedisConnectionFactory(JedisConnectionFactory) {
+            grailsCacheJedisConnectionFactory(JedisConnectionFactory, ref('grailsCacheRedisConfiguration')) {
                 usePool = configUsePool
-                database = configDatabase
-                hostName = configHostName
-                port = configPort
                 timeout = configTimeout
-                password = configPassword
-                poolConfig = ref('grailsCacheJedisPoolConfig')
-                shardInfo = ref('grailsCacheJedisShardInfo')
+                poolConfig = ref('grailsCacheRedisPoolConfig')
             }
 
             grailsRedisCacheSerializer(GrailsSerializer)
@@ -116,29 +120,17 @@ class CacheRedisGrailsPlugin extends Plugin {
                     hashKeySerializer = ref(hashKeySerializerBean)
             }
 
-            String delimiter = redisCacheConfig.cachePrefixDelimiter ?: ':'
-            redisCachePrefix(DefaultRedisCachePrefix, delimiter)
+            String delimiter = config.getProperty('grails.cache.redis.cachePrefixDelimiter', CacheKeyPrefix.SEPARATOR)
+            String prefix = config.getProperty('grails.cache.redis.cachePrefix', '')
+
+            grailsRedisCachePrefix(DelimiterCacheKeyPrefix, delimiter, prefix)
 
             grailsCacheManager(GrailsRedisCacheManager, ref('grailsCacheRedisTemplate')) {
-                cachePrefix = ref('redisCachePrefix')
+                cachePrefix = ref('grailsRedisCachePrefix', false)
                 timeToLive = ttlInSeconds
                 usePrefix = isUsePrefix
-            }
-
-            grailsCacheFilter(RedisPageFragmentCachingFilter) {
-                cacheManager = ref('grailsCacheManager')
-                nativeCacheManager = ref('grailsCacheRedisTemplate')
-                // TODO this name might be brittle - perhaps do by type?
-                cacheOperationSource = ref('org.springframework.cache.annotation.AnnotationCacheOperationSource#0')
-                keyGenerator = ref('webCacheKeyGenerator')
-                expressionEvaluator = ref('webExpressionEvaluator')
             }
         }
     }
 
-    private boolean isEnabled(GrailsApplication application) {
-        //TODO cache plugin enabled and this one is..
-        def enabled = application.config.grails.cache.enabled
-        enabled == null || enabled != false
-    }
 }

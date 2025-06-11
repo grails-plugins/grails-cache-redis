@@ -17,6 +17,7 @@ package grails.plugin.cache.redis;
 import grails.plugin.cache.GrailsCache;
 import grails.plugin.cache.GrailsValueWrapper;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.cache.CacheKeyPrefix;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * Based on package-scope org.springframework.data.redis.cache.RedisCache.
@@ -44,7 +46,7 @@ public class GrailsRedisCache implements GrailsCache {
     protected final String name;
     @SuppressWarnings("rawtypes")
     protected final RedisTemplate template;
-    protected final byte[] prefix;
+    protected final CacheKeyPrefix prefix;
     protected final byte[] setName;
     protected final byte[] cacheLockName;
     protected long WAIT_FOR_LOCK = 300;
@@ -54,17 +56,17 @@ public class GrailsRedisCache implements GrailsCache {
      * Constructor.
      *
      * @param name        cache name
-     * @param prefix
-     * @param template
-     * @param ttl
+     * @param prefix prefix to use
+     * @param template Spring template
+     * @param ttl time to live for cache
      */
-    public GrailsRedisCache(String name, byte[] prefix, RedisTemplate<? extends Object, ? extends Object> template, Long ttl) {
+    public GrailsRedisCache(String name, CacheKeyPrefix prefix, RedisTemplate<? extends Object, ? extends Object> template, Long ttl) {
         Assert.hasText(name, "non-empty cache name is required");
 
         this.name = name;
         this.template = template;
         this.prefix = prefix;
-        this.ttl = ttl == null ? NEVER_EXPIRE : ttl.longValue();
+        this.ttl = ttl == null ? NEVER_EXPIRE : ttl;
 
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
 
@@ -111,6 +113,17 @@ public class GrailsRedisCache implements GrailsCache {
             }
         }, true);
     }
+
+	@Override
+	public <T> T get(final Object key, Callable<T> valueLoader) {
+		/*
+		 * FIXME: I had to add this method override in order to satisfy
+		 * the Spring Cache interface. It looks like this method signature
+		 * including the Callable parameter was added sometime after the
+		 * original cache-redis plugin was developed (?).
+		 */
+		return (T) this.get(key);
+	}
 
     @SuppressWarnings("unchecked")
     @Override
@@ -247,15 +260,17 @@ public class GrailsRedisCache implements GrailsCache {
 
     public byte[] computeKey(Object key) {
         @SuppressWarnings("unchecked")
-        byte[] k = template.getKeySerializer().serialize(key);
+        byte[] serializedKey = template.getKeySerializer().serialize(key);
+        assert serializedKey != null;
 
-        if (prefix == null || prefix.length == 0) {
-            return k;
+        if (prefix == null) {
+            return serializedKey;
         }
 
+        byte[] prefixBytes = prefix.compute(name).getBytes();
         // ok to use Arrays.copyOf since spring-data-redis requires Java 6
-        byte[] result = Arrays.copyOf(prefix, prefix.length + k.length);
-        System.arraycopy(k, 0, result, prefix.length, k.length);
+        byte[] result = Arrays.copyOf(prefixBytes, prefixBytes.length + serializedKey.length);
+        System.arraycopy(serializedKey, 0, result, prefixBytes.length, serializedKey.length);
         return result;
     }
 

@@ -1,0 +1,89 @@
+The following configurations are available:
+
+All configuration values are prefixed with `grails.cache.redis`
+|===
+|Key |Default | Type |Description
+
+|`enabled` 
+|`true`
+|`boolean`
+|Disables or enables the Redis cache implementation (aka. initiates the needed services)
+
+|`database` 
+|`true`
+|`integer`
+|Redis database to use
+
+|`usePool`
+|`true`
+|`boolean`
+|Use the Redis connection pool
+
+|`hostName`
+|`localhost`
+|`String`
+|Server name to connect to
+
+|`port`
+|`6379`
+|`integer`
+|Server port to connect to
+
+|`username`
+|(not set)
+|`String`
+|Server username (only if required)
+
+|`password`
+|(not set)
+|`String`
+|Server password (only if required)
+
+|`timeout`
+|`2000`
+|`integer`
+|Connection timeout 
+
+|`ttl`
+|`0` (never expires)
+|`integer`
+|All caches timeout in seconds 
+
+|`keySerializer`
+|(not set)
+|`String`
+|Name of Key Serializer bean.
+
+|`hashKeySerializerBean`
+|(not set)
+|`String`
+|Name of Hash Key Serializer bean.
+
+|`usePrefix`
+|`false`
+|`boolean`
+|Use key prefix and delimiter
+
+
+|`cachePrefixDelimiter`
+|`::`
+|`String`
+|Key prefix delimiter (only used if `usePrefix` is set to `true`)
+
+|`prefix`
+|<empty string>
+|`String`
+|Key prefix (only used if `usePrefix` is set to `true`)
+
+|===
+
+*Note:* There is currently no way of setting each cache configuration individually. 
+
+=== Advanced configuration
+
+The standard configuration will use `org.springframework.data.redis.connection.RedisStandaloneConfiguration` and will connect to a single server. This configuration is instanticated as a the `grailsCacheRedisConfiguration` bean. If more advance configuration is needed, consider using `org.springframework.data.redis.connection.RedisClusterConfiguration` or `org.springframework.data.redis.connection.RedisSentinelConfiguration` instead.
+
+This should be archiveable by adding:
+
+----
+grailsCacheRedisConfiguration(RedisClusterConfiguration,)

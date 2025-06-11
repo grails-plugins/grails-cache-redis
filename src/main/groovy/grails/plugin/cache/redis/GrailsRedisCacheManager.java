@@ -14,10 +14,9 @@
  */
 package grails.plugin.cache.redis;
 
-import grails.plugin.cache.GrailsCacheManager;
+import org.grails.plugin.cache.GrailsCacheManager;
 import org.springframework.cache.Cache;
-import org.springframework.data.redis.cache.DefaultRedisCachePrefix;
-import org.springframework.data.redis.cache.RedisCachePrefix;
+import org.springframework.data.redis.cache.CacheKeyPrefix;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Collection;
@@ -39,7 +38,7 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
     @SuppressWarnings("rawtypes")
     protected final RedisTemplate redisTemplate;
     protected boolean usePrefix;
-    protected RedisCachePrefix cachePrefix = new DefaultRedisCachePrefix();
+    protected CacheKeyPrefix cachePrefix = CacheKeyPrefix.simple();
     protected Long ttl;
 
     public GrailsRedisCacheManager(@SuppressWarnings("rawtypes") RedisTemplate template) {
@@ -48,15 +47,16 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
 
     @SuppressWarnings("unchecked")
     public Cache getCache(String name) {
-        Cache c = caches.get(name);
-        if (c == null) {
-            c = new GrailsRedisCache(name, (usePrefix ? cachePrefix.prefix(name) : null), redisTemplate, ttl);
-            caches.put(name, c);
+        Cache cache = caches.get(name);
+        if (cache == null) {
+            cache = new GrailsRedisCache(name, usePrefix ? cachePrefix : null, redisTemplate, ttl);
+            caches.put(name, cache);
         }
 
-        return c;
+        return cache;
     }
 
+    @Override
     public Collection<String> getCacheNames() {
         return names;
     }
@@ -80,12 +80,14 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
      *
      * @param prefix the prefix
      */
-    public void setCachePrefix(RedisCachePrefix prefix) {
+    public void setCachePrefix(CacheKeyPrefix prefix) {
         cachePrefix = prefix;
     }
 
     /**
      * Enable the cache prefix.
+     * 
+     * @param use True if using prefix
      */
     public void setUsePrefix(Boolean use) {
         usePrefix = use;

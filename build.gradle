@@ -1,94 +1,63 @@
-buildscript {
-    ext {
-        grailsVersion = project.grailsVersion
-    }
-    repositories {
-        mavenLocal()
-        maven { url "https://repo.grails.org/grails/core" }
-    }
-    dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.8.2"
-        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
-    }
+plugins {
+    id 'groovy'
+    id 'java-library'
+    id 'io.github.gradle-nexus.publish-plugin'
+    id 'maven-publish'
+    id 'signing'
+    id 'org.asciidoctor.jvm.convert'
 }
 
-version '2.0.0.BUILD-SNAPSHOT'
-group 'org.grails.plugins'
+version = projectVersion
+group = 'org.grails.plugins'
+ext.set('grailsVersion', libs.versions.grails.asProvider().get())
+ext.set('isReleaseVersion', !version.toString().endsWith('-SNAPSHOT'))
+ext.set('isSnapshot', !isReleaseVersion)
 
-apply plugin:"eclipse"
-apply plugin:"idea"
-apply plugin:"org.grails.grails-plugin"
-apply plugin:"org.grails.grails-plugin-publish"
-apply plugin:"org.grails.grails-gsp"
-apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'org.grails.grails-plugin' // Needs to be applied after grailsVersion has been set
 
-ext {
-    grailsVersion = project.grailsVersion
-    gradleWrapperVersion = project.gradleWrapperVersion
-}
 
 repositories {
-    mavenLocal()
-    maven { url "https://repo.grails.org/grails/core" }
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.grails:grails-bom:$grailsVersion"
-    }
-    applyMavenExclusions false
+    mavenCentral()
+    maven { url "https://repo.grails.org/grails/core/" }
 }
 
 dependencies {
-    provided 'org.springframework.boot:spring-boot-starter-logging'
-    provided 'org.springframework.boot:spring-boot-autoconfigure'
-    provided 'org.springframework.boot:spring-boot-starter-actuator'
-    provided 'org.springframework.boot:spring-boot-starter-tomcat'
-    provided "org.grails:grails-dependencies"
-    provided "org.grails:grails-web-boot"
-    compile "org.grails:grails-core"
-    compile "org.grails.plugins:cache"
-    console "org.grails:grails-console"
-    profile "org.grails.profiles:web-plugin:3.1.8"
-    provided "org.grails:grails-plugin-services"
-    provided "org.grails:grails-plugin-domain-class"
-    testCompile "org.grails:grails-plugin-testing"
+    api libs.jedis.client
+    api libs.spring.data.redis
 
-    compile 'redis.clients:jedis:2.8.0'
-    compile 'org.springframework.data:spring-data-redis:1.6.2.RELEASE'
+    implementation libs.groovy.core 
+    implementation libs.spring.context 
+    implementation libs.spring.context.support 
+
+    implementation libs.grails.core
+    implementation libs.grails.cache
+
+    implementation libs.spring.beans
+    implementation libs.springboot.autoconfigure
+
+    implementation libs.jedis.client
+    implementation libs.spring.data.redis
+
+    testImplementation libs.grails.testing.support.core
+    testImplementation libs.spock.core
+
+    integrationTestImplementation libs.spring.web
+
+    integrationTestRuntimeOnly libs.slf4j.nop // Get rid of warning about missing slf4j implementation during test task
+    integrationTestRuntimeOnly libs.springboot.starter.tomcat
+    
+    testImplementation libs.bytebudy
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = gradleWrapperVersion
-}
-grailsPublish {
-    // TODO: Provide values here
-    user = 'user'
-    key = 'key'
-    githubSlug = 'foo/bar'
-    license {
-        name = 'Apache-2.0'
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
     }
-    title = "My Plugin"
-    desc = "Full plugin description"
-    developers = [johndoe:"John Doe"]
-    portalUser = ""
-    portalPassword = ""    
 }
 
-asciidoctor {
-    resources {
-        from('src/docs/images')
-        into "./images"
-    }
-
-    attributes 'experimental'  : 'true',
-            'compat-mode'   : 'true',
-            'toc'           : 'left',
-            'icons'         : 'font',
-            'version'       : project.version,
-            'sourcedir'     : "/src/main/groovy"
-}
-
-task docs(dependsOn:[asciidoctor])
+apply from: layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: layout.projectDirectory.file('gradle/grails-plugin-config.gradle')
+apply from: layout.projectDirectory.file('gradle/docs-config.gradle')
+apply from: layout.projectDirectory.file('gradle/publishing.gradle')

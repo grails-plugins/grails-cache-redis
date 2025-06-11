@@ -1,161 +1,153 @@
 package functional.tests
 
-import geb.spock.GebSpec
-import grails.plugins.rest.client.RestBuilder
-import grails.plugins.rest.client.RestResponse
-import grails.test.mixin.integration.Integration
-import grails.transaction.*
+import functional.tests.helpers.HttpClientSpec
+import functional.tests.helpers.RedisContainerHelper
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import io.micronaut.http.HttpResponse
 import spock.lang.Ignore
+import spock.lang.Specification
 
 @Integration
 @Rollback
-class CacheSpec extends GebSpec {
+class CacheSpec extends HttpClientSpec implements RedisContainerHelper  {
 
-    def setup() {
-        RestBuilder restBuilder = new RestBuilder()
-        RestResponse response = restBuilder.get("${baseUrl}/test/evict")
-        response.text == 'evict'
+    HttpResponse<?> response
 
-        response = restBuilder.get("${baseUrl}/test/clearCache?cacheName=message")
-        response.text == "cleared cache 'message'"
+    void setup() {
+        response = get("/test/evict")
+        response.body() == 'evict'
 
-        response = restBuilder.get("${baseUrl}/test/clearLogEntries")
-        response.text == 'deleted all LogEntry instances'
+        response = get("/test/clearCache?cacheName=message")
+        response.body() == "cleared cache 'message'"
+
+        response = get("/test/clearLogEntries")
+        response.body() == 'deleted all LogEntry instances'
     }
 
-    def cleanup() {
-        RestBuilder restBuilder = new RestBuilder()
-        RestResponse response = restBuilder.get("${baseUrl}/test/clearCache?cacheName=message")
-        response.text == "cleared cache 'message'"
+    void cleanup() {
+        response.body() == "cleared cache 'message'"
 
-        response = restBuilder.get("${baseUrl}/test/clearLogEntries")
-        response.text == 'deleted all LogEntry instances'
+        response = get("/test/clearLogEntries")
+        response.body() == 'deleted all LogEntry instances'
     }
 
     @Ignore
     void testCacheAndEvict() {
-        given:
-            RestBuilder restBuilder = new RestBuilder()
-            RestResponse response
-
         when: "check that there are no log entries"
-            response = restBuilder.get("${baseUrl}/test/logEntryCount")
+        response = get("/test/logEntryCount")
         then:
-            response.text == '0'
+        response.body() == '0'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/mostRecentLogEntry")
+        response = get("/test/mostRecentLogEntry")
         then:
-            response.text == 'none'
+        response.body() == 'none'
 
         when: "get the index action which should trigger caching"
-            response = restBuilder.get("${baseUrl}/test/index")
+        response = get("/test/index")
         then:
-            response.text == 'index'
+        response.body() == 'index'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/logEntryCount")
+        response = get("/test/logEntryCount")
         then:
-            response.text == '1'
+        response.body() == '1'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/mostRecentLogEntry")
+        response = get("/test/mostRecentLogEntry", Map)
 
         then:
-            response.json.message == 'Called index() action'
+        response.body().message == 'Called index() action'
 
-            long id = response.json.id
-            long dateCreated = response.json.dateCreated
+        long id = response.body().id
+        long dateCreated = response.body().dateCreated
 
         when: "get the index action again, should be cached"
-            response = restBuilder.get("${baseUrl}/test/index")
+        response = get("/test/index")
         then:
-            response.text == 'index'
+        response.body() == 'index'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/logEntryCount")
+        response = get("/test/logEntryCount")
         then:
-            response.text == '1'
+        response.body() == '1'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/mostRecentLogEntry")
+        response = get("/test/mostRecentLogEntry", Map)
 
         then:
-            response.json.message == 'Called index() action'
-            response.json.id == id
-            response.json.dateCreated == dateCreated
+        response.body().message == 'Called index() action'
+        response.body().id == id
+        response.body().dateCreated == dateCreated
 
         when: "evict"
-            response = restBuilder.get("${baseUrl}/test/evict")
+        response = get("/test/evict")
         then:
-            response.text == 'evict'
+        response.body() == 'evict'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/logEntryCount")
+        response = get("/test/logEntryCount")
         then:
-            response.text == '2'
+        response.body() == '2'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/mostRecentLogEntry")
+        response = get("/test/mostRecentLogEntry", Map)
         then:
-            response.json.message == 'Called evict() action'
-            response.json.id == id + 1
-            response.json.dateCreated > dateCreated
+        response.body().message == 'Called evict() action'
+        response.body().id == id + 1
+        response.body().dateCreated > dateCreated
 
         when: "save the values to compare"
-            id++
-            dateCreated = response.json.dateCreated
+        id++
+        dateCreated = response.json.dateCreated
         and: "get the index action again, should not be cached"
-            response = restBuilder.get("${baseUrl}/test/index")
+        response = get("/test/index")
         then:
-            response.text == 'index'
+        response.body() == 'index'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/logEntryCount")
+        response = get("/test/logEntryCount")
         then:
-            response.text == '3'
+        response.body() == '3'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/mostRecentLogEntry")
+        response = get("/test/mostRecentLogEntry", Map)
         then:
-            response.json.message == 'Called index() action'
-            response.json.id == id + 1
-            response.json.dateCreated > dateCreated
+        response.body().message == 'Called index() action'
+        response.body().id == id + 1
+        response.body().dateCreated > dateCreated
     }
 
     void testParams() {
-        given:
-            RestBuilder restBuilder = new RestBuilder()
-            RestResponse response
+        when:
+        response = get("/test/withParams?foo=baz&bar=123")
+        then:
+        response.body() == 'withParams baz 123'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/withParams?foo=baz&bar=123")
+        response = get("/test/withParams?foo=baz2&bar=1234")
         then:
-            response.text == 'withParams baz 123'
+        response.body() == 'withParams baz2 1234'
 
         when:
-            response = restBuilder.get("${baseUrl}/test/withParams?foo=baz2&bar=1234")
+        response = get("/test/withParams?foo=baz&bar=123")
         then:
-            response.text == 'withParams baz2 1234'
-
-        when:
-            response = restBuilder.get("${baseUrl}/test/withParams?foo=baz&bar=123")
-        then:
-            response.text == 'withParams baz 123'
+        response.body() == 'withParams baz 123'
 
         when: "try again with UrlMappings"
-            response = restBuilder.get("${baseUrl}/withParams/baz/123")
+        response = get("/withParams/baz/123")
         then:
-            response.text == 'withParams baz 123'
+        response.body() == 'withParams baz 123'
 
         when:
-            response = restBuilder.get("${baseUrl}/withParams/baz2/1234")
+        response = get("/withParams/baz2/1234")
         then:
-            response.text == 'withParams baz2 1234'
+        response.body() == 'withParams baz2 1234'
 
         when:
-            response = restBuilder.get("${baseUrl}/withParams/baz/123")
+        response = get("/withParams/baz/123")
         then:
-            response.text == 'withParams baz 123'
+        response.body() == 'withParams baz 123'
     }
 }

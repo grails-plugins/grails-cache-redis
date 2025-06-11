@@ -5,23 +5,23 @@ class CachingServiceController {
 	def cachingService
 
 	def cachingServiceInvocationCount() {
-		render 'Basic Caching Service Invocation Count Is ' + cachingService.invocationCounter
+		render text: "Basic Caching Service Invocation Count Is $cachingService.invocationCounter"
 	}
 
 	def cachingService() {
-		render "Value From Service Is '$cachingService.data'"
+		render text: "Value From Service Is '$cachingService.data'"
 	}
 
 	def cachePut(String key, String value) {
-		render 'Result: ' + cachingService.getData(key, value)
+		render text: "Result: ${cachingService.getData(key, value)}"
 	}
 
 	def cacheGet(String key) {
-		render 'Result: ' + cachingService.getData(key)
+		render text: "Result: ${cachingService.getData(key)}"
 	}
 
 	def clear() {
 		cachingService.clear()
-		render 'OK'
+		render text: 'OK'
 	}
 }
