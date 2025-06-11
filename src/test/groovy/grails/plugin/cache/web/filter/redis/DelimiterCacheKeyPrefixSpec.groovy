@@ -1,5 +1,6 @@
 package grails.plugin.cache.web.filter.redis
 
+import grails.plugin.cache.redis.internal.DelimiterCacheKeyPrefix
 import spock.lang.Specification
 
 class DelimiterCacheKeyPrefixSpec extends Specification {

@@ -1,7 +1,13 @@
 package grails.plugin.cache.redis
 
 import grails.config.Config
-import grails.plugin.cache.web.filter.redis.*
+import grails.plugin.cache.redis.internal.DelimiterCacheKeyPrefix
+import grails.plugin.cache.redis.internal.GrailsDeserializer
+import grails.plugin.cache.redis.internal.GrailsDeserializingConverter
+import grails.plugin.cache.redis.internal.GrailsRedisKeySerializer
+import grails.plugin.cache.redis.internal.GrailsRedisSerializer
+import grails.plugin.cache.redis.internal.GrailsSerializer
+import grails.plugin.cache.redis.internal.GrailsSerializingConverter
 import grails.plugins.Plugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

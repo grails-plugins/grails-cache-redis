@@ -1,6 +1,6 @@
 package grails.plugin.cache.redis
 
-import grails.plugin.cache.web.filter.redis.DelimiterCacheKeyPrefix
+import grails.plugin.cache.redis.internal.DelimiterCacheKeyPrefix
 import org.grails.testing.GrailsUnitTest
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.RedisSerializer

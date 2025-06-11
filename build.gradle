@@ -22,6 +22,8 @@ repositories {
 }
 
 dependencies {
+    api libs.jedis.client
+    api libs.spring.data.redis
 
     implementation libs.groovy.core 
     implementation libs.spring.context 

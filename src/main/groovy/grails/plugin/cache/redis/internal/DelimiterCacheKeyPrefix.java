@@ -1,4 +1,4 @@
-package grails.plugin.cache.web.filter.redis;
+package grails.plugin.cache.redis.internal;
 
 import org.springframework.data.redis.cache.CacheKeyPrefix;
 

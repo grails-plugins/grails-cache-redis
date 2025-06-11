@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.cache.web.filter.redis;
+package grails.plugin.cache.redis.internal;
 
-import org.springframework.core.NestedIOException;
 import org.springframework.core.serializer.Deserializer;
 
 import java.io.IOException;
