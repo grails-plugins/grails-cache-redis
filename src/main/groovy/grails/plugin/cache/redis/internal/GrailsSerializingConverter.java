@@ -44,7 +44,7 @@ public class GrailsSerializingConverter implements Converter<Object, byte[]> {
     /**
      * Dependency injection for the serializer.
      *
-     * @param serializer
+     * @param serializer to use
      */
     public void setSerializer(Serializer<Object> serializer) {
         this.serializer = serializer;

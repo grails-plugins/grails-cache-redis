@@ -55,7 +55,7 @@ public class GrailsRedisSerializer implements RedisSerializer<Object> {
     /**
      * Dependency injection for the serializer.
      *
-     * @param serializer
+     * @param serializer to use
      */
     public void setSerializer(Converter<Object, byte[]> serializer) {
         this.serializer = serializer;
@@ -64,7 +64,7 @@ public class GrailsRedisSerializer implements RedisSerializer<Object> {
     /**
      * Dependency injection for the deserializer.
      *
-     * @param deserializer
+     * @param deserializer to use
      */
     public void setDeserializer(Converter<byte[], Object> deserializer) {
         this.deserializer = deserializer;

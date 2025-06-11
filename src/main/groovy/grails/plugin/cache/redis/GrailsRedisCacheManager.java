@@ -86,6 +86,8 @@ public class GrailsRedisCacheManager implements GrailsCacheManager {
 
     /**
      * Enable the cache prefix.
+     * 
+     * @param use True if using prefix
      */
     public void setUsePrefix(Boolean use) {
         usePrefix = use;

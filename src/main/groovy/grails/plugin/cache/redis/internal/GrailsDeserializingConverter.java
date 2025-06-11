@@ -40,7 +40,7 @@ public class GrailsDeserializingConverter implements Converter<byte[], Object> {
     /**
      * Dependency injection for the deserializer.
      *
-     * @param deserializer
+     * @param deserializer to use
      */
     public void setDeserializer(Deserializer<Object> deserializer) {
         this.deserializer = deserializer;
