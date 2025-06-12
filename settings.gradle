@@ -24,5 +24,5 @@ buildCache {
     }
 }
 
-rootProject.name = "cache-redis"
+rootProject.name = 'grails-cache-redis'
 include 'functional-tests'
