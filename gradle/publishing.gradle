@@ -113,7 +113,7 @@ if (isReleaseVersion) {
     nexusPublishing {
         repositories {
             sonatype {
-                nexusUrl = uri(System.getenv('NEXUS_PUBLISH_URL'))
+                nexusUrl = uri(System.getenv('NEXUS_PUBLISH_URL') ?: '')
                 username = System.getenv('NEXUS_PUBLISH_USERNAME')
                 password = System.getenv('NEXUS_PUBLISH_PASSWORD')
                 stagingProfileId = System.getenv('NEXUS_PUBLISH_STAGING_PROFILE_ID')
