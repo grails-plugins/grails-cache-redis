@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"grails.plugin.cache.redis"},{"l":"grails.plugin.cache.redis.internal"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"grails.plugin.cache.redis"},{"l":"grails.plugin.cache.redis.internal"}]
