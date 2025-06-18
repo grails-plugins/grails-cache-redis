@@ -55,10 +55,10 @@ public class GrailsRedisCache implements GrailsCache {
     /**
      * Constructor.
      *
-     * @param name        cache name
-     * @param prefix prefix to use
+     * @param name     cache name
+     * @param prefix   prefix to use
      * @param template Spring template
-     * @param ttl time to live for cache
+     * @param ttl      time to live for cache
      */
     public GrailsRedisCache(String name, CacheKeyPrefix prefix, RedisTemplate<? extends Object, ? extends Object> template, Long ttl) {
         Assert.hasText(name, "non-empty cache name is required");
@@ -114,16 +114,16 @@ public class GrailsRedisCache implements GrailsCache {
         }, true);
     }
 
-	@Override
-	public <T> T get(final Object key, Callable<T> valueLoader) {
-		/*
-		 * FIXME: I had to add this method override in order to satisfy
-		 * the Spring Cache interface. It looks like this method signature
-		 * including the Callable parameter was added sometime after the
-		 * original cache-redis plugin was developed (?).
-		 */
-		return (T) this.get(key);
-	}
+    @Override
+    public <T> T get(final Object key, Callable<T> valueLoader) {
+        /*
+         * FIXME: I had to add this method override in order to satisfy
+         * the Spring Cache interface. It looks like this method signature
+         * including the Callable parameter was added sometime after the
+         * original cache-redis plugin was developed (?).
+         */
+        return (T) this.get(key);
+    }
 
     @SuppressWarnings("unchecked")
     @Override
