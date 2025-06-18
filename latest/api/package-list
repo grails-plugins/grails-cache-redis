@@ -1,0 +1,3 @@
+grails.cache.redis
+grails.plugin.cache.redis
+grails.plugin.cache.redis.internal
