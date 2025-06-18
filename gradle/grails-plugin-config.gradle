@@ -4,5 +4,4 @@ tasks.named('bootJar') {
 tasks.named('jar', Jar) {
     enabled = true // Enable the jar task again, as the bootJar task has been disabled
     archiveClassifier = '' // Remove '-plain' suffix from jar file name
-    exclude('_testemails', 'messages*.properties')
 }
