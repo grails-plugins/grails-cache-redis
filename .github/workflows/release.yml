@@ -3,9 +3,11 @@ on:
   release:
     types: [published]
 jobs:
-  release:
-    name: "Publish Release"
+  stage:
+    name: "Stage Release"
     runs-on: ubuntu-24.04
+    outputs:
+      release_version: ${{ steps.release_version.outputs.value }}
     permissions:
       packages: read  # for pre-release workflow
       contents: write  # to commit changes related to the release and publish documentation to gh-pages
@@ -24,9 +26,11 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: "📝 Store the current release version"
+        id: release_version
         run: |
           echo "Release version: ${GITHUB_REF:11}"
           echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
+          echo "value=${RELEASE_VERSION}" >> $GITHUB_OUTPUT
       - name: "⚙ Run pre-release"
         uses: apache/grails-github-actions/pre-release@asf
       - name: "🔐 Generate key file for artifact signing"
@@ -38,15 +42,49 @@ jobs:
           GRAILS_PUBLISH_RELEASE: 'true'
           NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_PUBLISH_USERNAME }}
           NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PUBLISH_PASSWORD }}
-          NEXUS_PUBLISH_URL: ${{ secrets.NEXUS_PUBLISH_RELEASE_URL }}
-          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.NEXUS_PUBLISH_STAGING_PROFILE_ID }}
+          NEXUS_PUBLISH_URL: 'https://ossrh-staging-api.central.sonatype.com/service/local/'
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
         run: >
           ./gradlew
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
           publishToSonatype
-          closeAndReleaseSonatypeStagingRepository
+          closeSonatypeStagingRepository
+  publish:
+    name: "Publish Release"
+    needs: [ stage ]
+    environment: release
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: read  # for pre-release workflow
+      contents: write  # to commit changes related to the release and publish documentation to gh-pages
+      issues: write  # to modify milestones
+      pull-requests: write
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: v${{ needs.stage.outputs.release_version }}
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: liberica
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      - name: "📤 Release artifacts"
+        env:
+          GRAILS_PUBLISH_RELEASE: 'true'
+          NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_PUBLISH_USERNAME }}
+          NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PUBLISH_PASSWORD }}
+          NEXUS_PUBLISH_URL: 'https://ossrh-staging-api.central.sonatype.com/service/local/'
+        run: >
+          ./gradlew
+          findSonatypeStagingRepository
+          releaseSonatypeStagingRepository
       - name: "📖 Generate Documentation"
         run: ./gradlew docs
       - name: "📤 Publish Documentation to Github Pages"
@@ -55,6 +93,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GRADLE_PUBLISH_RELEASE: 'true'
           SOURCE_FOLDER: build/docs
-          VERSION: ${{ env.RELEASE_VERSION }}
+          VERSION: ${{ needs.stage.outputs.release_version }}
       - name: "⚙️ Run post-release"
         uses: apache/grails-github-actions/post-release@asf
