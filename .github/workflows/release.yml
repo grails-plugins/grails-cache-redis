@@ -10,6 +10,7 @@ jobs:
       packages: read  # for pre-release workflow
       contents: write  # to commit changes related to the release and publish documentation to gh-pages
       issues: write  # to modify milestones
+      pull-requests: write
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
