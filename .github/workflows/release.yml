@@ -29,7 +29,8 @@ jobs:
         id: release_version
         run: |
           echo "Release version: ${GITHUB_REF:11}"
-          echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
+          export RELEASE_VERSION="${GITHUB_REF:11}"
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_ENV
           echo "value=${RELEASE_VERSION}" >> $GITHUB_OUTPUT
       - name: "⚙ Run pre-release"
         uses: apache/grails-github-actions/pre-release@asf
